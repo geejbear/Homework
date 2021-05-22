@@ -1,3 +1,11 @@
+/*
+ * Author: Geejbear
+ * Date 22.05.2021
+ * Revised by: Thomas Foster
+ * Created with the LibTC Turbo C library (https://github.com/teefoss/LibTC) 
+ * "Bar Game" - a short interactive story implementing Turbo and Modern C
+ */
+
 #include <dos.h>
 #include <conio.h>
 #include <stdbool.h>
