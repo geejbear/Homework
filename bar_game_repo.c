@@ -12,11 +12,12 @@
 
 #define CH_ARROW_R 0x1A 
 #define CH_ARROW_L 0x1B
-#define MILLISECONDS 100
+#define MILLISECONDS 100 // fine, or maybe 'NOTE_LEN_MS'
 #define CH_BEER 0x96
 #define CH_WINE 0x59
 #define CH_SMILY 0x02
 
+#define TEXT_MARGIN 8
 
 void sound_major()
 {
@@ -32,12 +33,13 @@ void sound_quit()
     sound(261, MILLISECONDS);
 }
 
-void icon(int color_icon, char ch_arrow_r, 
-            char ch_icon, char ch_arrow_l) 
+// name: something like print_icon (functions begin with a verb/action word)
+// remove redundant params: arrows (these are constants)
+void icon(int color_icon, char ch_arrow_r, char  ch_icon, char  ch_arrow_l)
             // -> Y <- , -> B <-
 {
     textcolor(color_icon);
-    cprintf("       ");
+    cprintf("        "); // gotoxy(TEXT_MARGIN, wherey())
     putch(ch_arrow_r);
     putch(ch_icon);
     putch(ch_arrow_l);
@@ -80,6 +82,7 @@ void choice_drink()
 }
 
 // TODO: make these one function (DRY)
+// remove arrow params
 void choice(int color_icon, char ch_arrow_r, char ch_icon, 
             char ch_arrow_l, int color_text, char ch_arrow_r2)
 {
