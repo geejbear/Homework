@@ -33,15 +33,17 @@ void push(mystack_t *stack, int value)
 
 
 // pop (remove) from the stack: decrease top by 1
-int pop(mystack_t *stack, int value)
+int pop(mystack_t *stack)
 {
     // TODO: this
     // check if the stack is empty!
     
     if (stack->top != -1) {
-        value = stack->data[stack->top];
+        int value = stack->data[stack->top];
         stack->top--;
+        return value;
     }
+    return 0;
 }
 
 
@@ -60,9 +62,6 @@ mystack_t new_stack()
 bool stack_is_empty(mystack_t *check)
 {
     // TODO: this
-    if (check->top != -1) {
+    return (check->top = -1) == true;
     
-        return false; 
-    }
-        
 }

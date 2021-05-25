@@ -14,7 +14,7 @@ typedef struct
 } mystack_t;
 
 void push(mystack_t *stack, int value);
-int pop(mystack_t *stack, int value);
+int pop(mystack_t *stack);
 mystack_t new_stack();
 bool stack_is_empty(mystack_t *check);
 

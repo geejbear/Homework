@@ -8,9 +8,9 @@ int main()
     push(&stack, 27);
     push(&stack, 3);
     
-    int a = pop(&stack, 3);
+    int a = pop(&stack);
 
-    printf("%d\n", a); // should print "3"
+    printf("%d\n", a);
 
     
     return 0;
