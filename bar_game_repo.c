@@ -16,6 +16,7 @@
 #define CH_BEER 0x96
 #define CH_WINE 0x59
 #define CH_SMILY 0x02
+#define TEXT_MARGIN 8
 
 #define TEXT_MARGIN 8
 
@@ -35,14 +36,14 @@ void sound_quit()
 
 // name: something like print_icon (functions begin with a verb/action word)
 // remove redundant params: arrows (these are constants)
-void icon(int color_icon, char ch_arrow_r, char  ch_icon, char  ch_arrow_l)
+void print_icon(int color_icon, char ch_icon)
             // -> Y <- , -> B <-
 {
     textcolor(color_icon);
-    cprintf("        "); // gotoxy(TEXT_MARGIN, wherey())
-    putch(ch_arrow_r);
+    gotoxy(TEXT_MARGIN, wherey());
+    putch(CH_ARROW_R);
     putch(ch_icon);
-    putch(ch_arrow_l);
+    putch(CH_ARROW_L);
 }
 
 void intro()
@@ -58,8 +59,10 @@ void intro()
 void order_drink()
 {
     cprintf("\n\n");
-    cprintf("        'ello Gov'nor!\n\n");
-    cprintf("        wha'can i getcha?\n");   
+    gotoxy(TEXT_MARGIN, wherey());
+    cprintf("'ello Gov'nor!\n\n");
+    gotoxy(TEXT_MARGIN, wherey());
+    cprintf("wha'can i getcha?\n");   
     textcolor(LIGHTGRAY);
     cprintf("\n\n\n\n");
     cprintf("Press '2' to order ");
@@ -71,29 +74,27 @@ void choice_drink()
     clrscr();
     textcolor(LIGHTGRAY);
     cprintf("wine? press 'W'\n\n\n");
-    
-    icon(RED, CH_ARROW_R, CH_WINE, CH_ARROW_L);
+    print_icon(RED, CH_WINE);
     cprintf("\n\n");
     textcolor(LIGHTGRAY);
     cprintf("or beer...? press 'B'\n\n\n");
-    
-    icon(YELLOW, CH_ARROW_R, CH_BEER, CH_ARROW_L);
+    print_icon(YELLOW, CH_BEER);
     
 }
 
 // TODO: make these one function (DRY)
 // remove arrow params
-void choice(int color_icon, char ch_arrow_r, char ch_icon, 
-            char ch_arrow_l, int color_text, char ch_arrow_r2)
+void choice(int color_icon, char ch_icon, 
+             int color_text)
 {
     sleep(1);
     sound_major();
     clrscr();
-    icon(color_icon, ch_arrow_r, ch_icon, ch_arrow_l);
+    print_icon(color_icon, ch_icon);
     cprintf("\n\n\n");
     textcolor(color_text);
     cprintf("press '3'...");
-    putch(ch_arrow_r2);
+    putch(CH_ARROW_R);
 }
 
 void end()
@@ -102,8 +103,10 @@ void end()
     gotoxy(18, 6);
     putch(0x02);
     cprintf("\n\n");
-    cprintf("        'ier ya go, mate!\n\n");    
-    cprintf("        on d'house!\n"); 
+    gotoxy(TEXT_MARGIN, wherey());
+    cprintf("'ier ya go, mate!\n\n");    
+    gotoxy(TEXT_MARGIN, wherey());
+    cprintf("on d'house!\n"); 
     textcolor(LIGHTGRAY);
     cprintf("\n\n\nthe end! (press 'Q')");
 }
@@ -149,13 +152,13 @@ int main()
                     break;
                 case STATE_WINE_AND_BEER:
                     if (key == 'w') {
-                        choice(RED, CH_ARROW_R, CH_WINE, 
-                                CH_ARROW_L, LIGHTGRAY, CH_ARROW_R);
+                        choice(RED, CH_WINE, 
+                                LIGHTGRAY);
                         state = STATE_END;
                    
                     } else if (key == 'b') {
-                        choice(YELLOW, CH_ARROW_R, CH_BEER, 
-                                CH_ARROW_L, LIGHTGRAY, CH_ARROW_R);
+                        choice(YELLOW, CH_BEER, 
+                                LIGHTGRAY);
                         state = STATE_END;
                     }    
                     break;
