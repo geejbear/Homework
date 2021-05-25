@@ -12,7 +12,7 @@
 
 #define CH_ARROW_R 0x1A 
 #define CH_ARROW_L 0x1B
-#define MILLISECONDS 100 // fine, or maybe 'NOTE_LEN_MS'
+#define NOTE_LEN_MS 100 // fine, or maybe 'NOTE_LEN_MS'
 #define CH_BEER 0x96
 #define CH_WINE 0x59
 #define CH_SMILY 0x02
@@ -22,16 +22,16 @@
 
 void sound_major()
 {
-    sound(261, MILLISECONDS);
-    sound(326, MILLISECONDS);
-    sound(391, MILLISECONDS);
+    sound(261, NOTE_LEN_MS);
+    sound(326, NOTE_LEN_MS);
+    sound(391, NOTE_LEN_MS);
 }
 
 void sound_quit()
 {
-    sound(391, MILLISECONDS);
-    sound(326, MILLISECONDS);
-    sound(261, MILLISECONDS);
+    sound(391, NOTE_LEN_MS);
+    sound(326, NOTE_LEN_MS);
+    sound(261, NOTE_LEN_MS);
 }
 
 // name: something like print_icon (functions begin with a verb/action word)
