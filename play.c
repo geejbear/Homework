@@ -7,21 +7,9 @@
  * 
  */   
 
-
 #include <stdio.h>
 #include <dos.h>
 #include <math.h>
-
-typedef struct 
-{
-    float whole;        //2^5
-    float minim;        //2^4
-    float crochet;      //2^2
-    float crochet_d;    // 3/2 (1.50)
-    float quaver;       // 2
-    float quaver_d;     // 3/4 (0.75)    
-    float semi_quaver;  // 1/2 (0.50)
-} duration_t;
 
 enum
 {
@@ -40,7 +28,6 @@ enum
 };
 
 // TODO: call it 'bpm' or 'tempo'
-const float metronome = 60.0f;// variable in bpm(beats per second)
 
 
 float freq(int note)
@@ -53,26 +40,68 @@ float freq(int note)
     return frequency;
 }
 
-// naming: length -> note_value, beat -> notevalue_to_ms
-float beat(float length)
+int note_value(int value)
+{
+    switch (value) {
+    case 16: return value / 16;   //1
+        break;
+    case 8: return value / 4;     //2
+        break;
+    case 4: return value / 1;     //4
+        break;
+    case 2: return value * 4;     //8
+        break;
+    case 1: return value * 16;    //16
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
+// naming: value -> note_value, beat -> notevalue_to_ms
+float beat(int value, int tempo)
 {
     //for rhythm...:
+
     float std_bps = 60.00f; //bps (standarized for the purpose of this calculation)
 
     // 4.00 = constant(k)
-    float ms = (length * 1000.00f) / 4.00f;
+    float ms = (note_value(value) * 1000.00f) / 4.00f;
     
-    //calculating milliseconds... length ∝ 1/ms -> 4, which is our constant
+    //calculating milliseconds... value ∝ 1/ms -> 4, which is our constant
    
-    return std_bps * ms / metronome;  //TODO: do inverse proportion of this value against variable declaration 'float length', 
-                                      // and call it "float x" before calling the return value.
+    return std_bps * ms / tempo;  
 }
-  
+
 int main()
 {
+    int tempo;
+    printf("How many beats per minute? :\n");
+    scanf("%d", &tempo);
+
+    printf("\nChoose a note and print its number :\n");
     
-    printf("%f\n", freq(A));
-    printf("%f\n", beat(5.0f));
+    printf("\n1.C\t2.CIS\t3.D\t4.DIS\n");
+    printf("5.E\t6.F\t7.FIS\t8.G\t\n");
+    printf("9.GIS\t10.A\t11.B\t12.H\t\n");
+    
+    printf("\n");
+    
+    int input;
+    scanf("%d", &input);    
+
+    int num;
+    printf("\nPrint a note value from the following options :\n");
+    printf("\n1\t2\t4\t8\t16\n");
+    
+    printf("\n");
+    
+    scanf("%d", &num);
+    
+    printf("\n");
+    printf("Frequency: %.4f Hz\n", freq(input - 1));
+    printf("Milliseconds: %.2f\n", beat(num, tempo));
+    printf("\n");
     // last step in Libdos: sound(frequency, milliseconds);
     
     return 0;
