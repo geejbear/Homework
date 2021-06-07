@@ -6,9 +6,9 @@
  * Description : game
  *
  * TODO LIST
- * - keep the player from going off screen
- * - try somthing simple like place an item(s) the player collects
- *
+ * - X keep the player from going off screen
+ * - _ try somthing simple like place an item(s) the player collects
+ * - _ 
  */
 #include <dos.h>
 #include <conio.h>
