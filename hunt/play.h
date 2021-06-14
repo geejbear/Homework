@@ -1,11 +1,9 @@
+// TODO: move file header here: info for users of this module
+
 #ifndef PLAY_H
 #define PLAY_H
-#include <stdio.h>
-#include <dos.h>
-#include <conio.h>
-#include <math.h>
-#include <stdbool.h>
 
+// TODO: typedef it!
 enum
 {
     NOTE_C,
@@ -22,10 +20,6 @@ enum
     NOTE_H,
 };
 
-float freq(int note, int oct);
-int clamp(int value, int min, int max);
-float octave(int oct);
-float notevalue_to_ms(int value, int tempo); //made this  public because play() uses it. 
 void play(int note, int octave, int note_value, int tempo);
 
 #endif 
