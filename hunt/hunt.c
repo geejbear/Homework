@@ -23,6 +23,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "play.h"
+#include "utility.h"
+#include <time.h>
+#include <stdlib.h>
+
 
 // =============================================================================
 // DEFINES
@@ -33,6 +37,15 @@
 // note: minimum x and y is 1
 #define MAX_X       SCREEN_W
 #define MAX_Y       SCREEN_H
+
+#define MIN_X       1
+#define MIN_Y       1
+
+#define OCTAVE      4  
+#define NOTE_VALUE  16  
+#define TEMPO       220   
+#define STARTING_PT 10 
+
 
 // =============================================================================
 // STRUCTS / TYPES / ENUMS
@@ -55,64 +68,41 @@ enum ascii // TODO: put this in ascii.h -> make names generic
     CH_QUAVER,
     CH_SEMIQUAVERS,
     CH_SPARKLE,
-    CH_NATURAL = 21,
+    CH_NAK = 21,
     CH_BLOCK,
     CH_ARROW_UP = 24,
     CH_ARROW_DOWN,
     CH_ARROW_LEFT,
     CH_ARROW_RIGHT,
-    CH_SHARP = 35,
-    CH_FLAT = 98,
+    CH_POUND = 35,
+    CH_LETTER_B = 98,
     // TODO: look at ascii chart and add other potentially useful characters
-};
-
-enum 
-{
-    STATE_SEARCH,
-    STATE_FIND,
-    STATE_COLLECT,
 };
 
 // =============================================================================
 // PROTOTYPES (function declarations)
 
-/*state = STATE_FIND;
-switch (state) {
-    case 'w':
-}*/
-
-// TODO: better CHAR_print_item
 
 // =============================================================================
 // DATA (state) global variables are initialized to 0 by default
 
-int player_x = 10;
-int player_y = 10;
-
 bool gem_collected = false; // this is a possibility
-int gem_x = 4; // TODO: in code, stop using "magic value" (4, 4)
-int gem_y = 4;
 
+typedef struct
+{
+int         player_x;
+int         player_y;
+} player_t;
+
+typedef struct
+{
+int         gem_x; // TODO: in code, stop using "magic value" (4, 4)
+int         gem_y;
+} gem_t;
 // TODO: gem location data
 
 // =============================================================================
 // FUNCTIONS
-
-// TODO: move to utility module (utility.c and utility.h)
-int clamp(int value, int min, int max)
-{
-    int result;
-    
-    if (value < min) {
-        result = min;
-    } else if (value > max) {
-        result = max;
-    } else { // in range
-        result = value;
-    }
-    
-    return result;
-}
 
 int print_river(int n)
 {
@@ -134,76 +124,100 @@ int print_river(int n)
 
 void sound_collect()
 {
-    play(1, 4, 120, 60); // TODO: use enum value
-    play(5, 4, 120, 60);
-    play(8, 4, 120, 60);
+    play(NOTE_C, OCTAVE, NOTE_VALUE, TEMPO); 
+    play(NOTE_E, OCTAVE, NOTE_VALUE, TEMPO);
+    play(NOTE_G, OCTAVE, NOTE_VALUE, TEMPO);
 }
 
 // TODO: param names
-void print_item(int x, int y, int COLOR, char ICON)
+void CHAR_print_item(gem_t *g, int COLOR, char ICON)
 {
-    gotoxy(x, y);
+    g->gem_x = 10;
+    g->gem_y = 10;
+    gotoxy(g->gem_x, g->gem_y);
     textcolor(COLOR);
     putch(ICON);
     textcolor(LIGHTGRAY);
 }
 
-void draw_entire_level()
+void draw_everything(player_t *p)
 {
-    cprintf("%d %d", player_x, player_y);
     
-    gotoxy(player_x, player_y);
+    gotoxy(20, 1); //these are temporary...it helps me visualize x and y
+    cprintf("X");
+    gotoxy(1, 20);
+    cprintf("Y");
+    
+    int ctime = time(NULL);
+    srand(ctime);
+    
+    p->player_x = rand() % MAX_X;
+    p->player_y = rand() % MAX_Y;
+    gotoxy(p->player_x, p->player_y);
     putch(CH_SMILY1);
-    if ( !gem_collected )
-        print_item(4, 4, GREEN, CH_DIAMOND);
+    gotoxy(1, 1);
+    cprintf("%d %d", p->player_x, p->player_y);
+
 }
 
-
-void key_hit() // this function: every time a hit is hit
+/*void print_rand_ITEM()
 {
+    int ctime = time(NULL);
+    srand(ctime);
+
+    gem_x = rand() % MAX_X;
+    gem_y = rand() % MAX_Y;    
+   
+    CHAR_print_item(*ptr1, *ptr2, GREEN, CH_DIAMOND);
+}
+*/
+/*void collect_gem()
+{
+    if ( !gem_collected && player_x == *ptr1 && player_y == *ptr2 ) { // player is on gem!
+        // do collect gem stuff
+        gem_collected = true;
+        sound_collect();
+    }
+}*/
+
+void key_hit(player_t *p) // this function: every time a hit is hit
+{
+    
     clrscr();
     int key = getch();
     
     switch (key) {
         case 'w': // TODO: optimize logic for wasd
-            --player_y;
-            if (player_y < 1) { // TODO: this is a good use case for clamp()
-                ++player_y;
+            --p->player_y;
+            if (p->player_y < MIN_Y) { // TODO: this is a good use case for clamp()
+                ++p->player_y;
             }
             break;
         case 's':
-            ++player_y;
-            if (player_y > 20) { // TODO: use #define name
-                --player_y;
+            ++p->player_y;
+            if (p->player_y > MAX_Y) { 
+                --p->player_y;
             }
             break;
         case 'a':
-            --player_x;
-            if (player_x < 1) {
-                ++player_x;
+            --p->player_x;
+            if (p->player_x < MIN_X) {
+                ++p->player_x;
             }
             break;
         case 'd':
-            ++player_x;
-            if (player_x > 20) {
-                --player_x;
+            ++p->player_x;
+            if (p->player_x > MAX_X) {
+                --p->player_x;
             }
             break;
         default:
             break;
     }
-    
-    // player has moved, but level has not been redrawn
-    
-    if ( !gem_collected && player_x == 4 && player_y == 4 ) { // player is on gem!
-        // do collect gem stuff
-        gem_collected = true;
-        
-        sound_collect();
-    }
-    
     // TODO: the player has moved, does something happen?
-    draw_entire_level();
+    //player_t plr;
+    //draw_everything(&plr); 
+    //collect_gem();
 }
 
 int main()
@@ -213,17 +227,17 @@ int main()
     setcursor(0);
     initdos();
     
-    draw_entire_level();
-
-    // TODO: fix your funky indentation!
+    player_t plr;
+    draw_everything(&plr);
+    print_rand_ITEM();
     while (1) {
-
-        // add code to check for a key press (kbhit & getch)
         if (kbhit()) {
-            key_hit();
-        }
+            player_t plr;
+            key_hit(&plr);
+            
 
-            refresh();
+        }
+        refresh();
     }    
-        return 0;
+    return 0;
 }
