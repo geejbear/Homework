@@ -1,31 +1,31 @@
+/*
+ * Created by Geegbear  
+ * 29/05/2021  
+ * "Frequency/millisecond calculator" // TODO: write for what a user needs to know
+ * To be implemented along the function 'sound(...)' from the LibTC
+ * Such implementation has not yet been tested!
+ * 
+ */  
+
 #ifndef PLAY_H
 #define PLAY_H
-#include <stdio.h>
-#include <dos.h>
-#include <conio.h>
-#include <math.h>
-#include <stdbool.h>
 
-enum
+typedef enum
 {
     NOTE_C,
-    NOTE_CIS,
+    NOTE_C_SHARP,
     NOTE_D,
-    NOTE_DIS,
+    NOTE_D_SHARP,
     NOTE_E,
     NOTE_F,
-    NOTE_FIS,
+    NOTE_F_SHARP,
     NOTE_G,
-    NOTE_GIS,
+    NOTE_G_SHARP,
     NOTE_A,
-    NOTE_B,
-    NOTE_H,
-};
+    NOTE_B_FLAT,
+    NOTE_B
+} NOTE_TYPE;
 
-float freq(int note, int oct);
-int clamp(int value, int min, int max);
-float octave(int oct);
-float notevalue_to_ms(int value, int tempo); //made this  public because play() uses it. 
 void play(int note, int octave, int note_value, int tempo);
 
 #endif 

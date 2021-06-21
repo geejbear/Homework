@@ -10,13 +10,15 @@ int main()
     printf("How many beats per minute?: ");
     scanf("%d", &tempo);
 
-    printf("\nC(1)\tC#(2)\tD(3)\tD#(4)\n");
-    printf("E(5)\tF(6)\tF#(7)\tG(8)\t\n");
-    printf("G#(9)\tA(10)\tB♭(11)\tB(12)\t\n");
+    printf("\nNOTE_C\tNOTE_C_SHARP\tNOTE_D\tNOTE_D_SHARP\n");
+    printf("NOTE_E\tNOTE_F\tNOTE_F_SHARP\tNOTE_G\t\n");
+    printf("NOTE_G_SHARP\tNOTE_A\tNOTE_B_FLAT\tNOTE_B\t\n");
     
-    printf("\nChoose a note and print its number :");
-    int input;
-    scanf("%d", &input);    
+    printf("\nType your choice of note :");
+    char input[20]; //both variables should be th same type 
+    char *ptr; 
+    ptr = input;
+    scanf("%s", &input[0]);    
 
     printf("\n1\t2\t3\t4\t5\t6\t7\n");
     printf("Choose an octave: ");
@@ -31,7 +33,7 @@ int main()
     
     scanf("%d", &num);
     
-    float frequency = freq(input - 1, oct);
+    float frequency = freq(ptr, oct);
     float ms = notevalue_to_ms(num, tempo);
     
     printf("\nFrequency: %.4f Hz\n", frequency);
