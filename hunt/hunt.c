@@ -26,6 +26,7 @@
 #include "utility.h"
 #include <time.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 
 // =============================================================================
@@ -157,8 +158,8 @@ void draw_everything(player_t *p, gem_t *gem)
     gotoxy(p->player_x, p->player_y);
     putch(CH_SMILY1);
     
-    gotoxy(1, 1); // DEBUG: player location
-    cprintf("%d %d", p->player_x, p->player_y);
+    //gotoxy(1, 1); // DEBUG: player location
+    printf("%d %d\n", p->player_x, p->player_y);
     
     gotoxy(gem->gem_x, gem->gem_y);
     textcolor(LIGHTGREEN);
@@ -195,25 +196,25 @@ void key_hit(player_t *p, gem_t *gem) // this function: every time a hit is hit
         case 'w': // TODO: optimize logic for wasd
             --p->player_y;
             if (p->player_y < MIN_Y) { // TODO: this is a good use case for clamp()
-                ++p->player_y;
+                p->player_y = MIN_Y;
             }
             break;
         case 's':
             ++p->player_y;
             if (p->player_y > MAX_Y) { 
-                --p->player_y;
+                p->player_y = MAX_Y;
             }
             break;
         case 'a':
             --p->player_x;
             if (p->player_x < MIN_X) {
-                ++p->player_x;
+                p->player_x = MIN_X;
             }
             break;
         case 'd':
             ++p->player_x;
             if (p->player_x > MAX_X) {
-                --p->player_x;
+                p->player_x = MAX_X;
             }
             break;
         default:
@@ -228,13 +229,15 @@ void key_hit(player_t *p, gem_t *gem) // this function: every time a hit is hit
 int main()
 {
     textmode(C40);
-    setscreensize(SCREEN_W, SCREEN_H);
     setcursor(0);
+    setscreensize(SCREEN_W, SCREEN_H);
     initdos();
     
     srand((unsigned)time(NULL));
     
     player_t plr;
+    plr.player_x = (rand() % 10) + 1;
+    plr.player_y = (rand() % 10) + 1;
     gem_t gem;
     gem.gem_x = (rand() % 20) + 1;
     gem.gem_y = (rand() % 20) + 1;
