@@ -88,16 +88,18 @@ enum ascii // TODO: put this in ascii.h -> make names generic
 
 bool gem_collected = false; // this is a possibility
 
+
+// TODO: DRY: single struct to represent game objects
 typedef struct
 {
-int         player_x;
-int         player_y;
+    int player_x; // remove reduncant 'player' part of name
+    int player_y;
 } player_t;
 
 typedef struct
 {
-int         gem_x; // TODO: in code, stop using "magic value" (4, 4)
-int         gem_y;
+    int gem_x; // TODO: in code, stop using "magic value" (4, 4)
+    int gem_y;
 } gem_t;
 // TODO: gem location data
 
@@ -129,7 +131,8 @@ void sound_collect()
     play(NOTE_G, OCTAVE, NOTE_VALUE, TEMPO);
 }
 
-// TODO: param names
+// TODO: fix param names: capitals are for #defined constants etc: used lowercase
+// TODO: function name: all lowers
 void CHAR_print_item(gem_t *g, int COLOR, char ICON)
 {
     g->gem_x = 10;
@@ -140,24 +143,26 @@ void CHAR_print_item(gem_t *g, int COLOR, char ICON)
     textcolor(LIGHTGRAY);
 }
 
-void draw_everything(player_t *p)
+// TODO: function should do only one thing: draw (no game changes, for instance)
+void draw_everything(player_t *p, gem_t *gem)
 {
     
-    gotoxy(20, 1); //these are temporary...it helps me visualize x and y
+    gotoxy(20, 1); // TEMP: it helps me visualize x and y
     cprintf("X");
     gotoxy(1, 20);
     cprintf("Y");
-    
-    int ctime = time(NULL);
-    srand(ctime);
-    
-    p->player_x = rand() % MAX_X;
-    p->player_y = rand() % MAX_Y;
+        
+    //p->player_x = rand() % MAX_X;
+    //p->player_y = rand() % MAX_Y;
     gotoxy(p->player_x, p->player_y);
     putch(CH_SMILY1);
-    gotoxy(1, 1);
+    
+    gotoxy(1, 1); // DEBUG: player location
     cprintf("%d %d", p->player_x, p->player_y);
-
+    
+    gotoxy(gem->gem_x, gem->gem_y);
+    textcolor(LIGHTGREEN);
+    putch(4); // TODO: use constant
 }
 
 /*void print_rand_ITEM()
@@ -180,7 +185,7 @@ void draw_everything(player_t *p)
     }
 }*/
 
-void key_hit(player_t *p) // this function: every time a hit is hit
+void key_hit(player_t *p, gem_t *gem) // this function: every time a hit is hit
 {
     
     clrscr();
@@ -216,7 +221,7 @@ void key_hit(player_t *p) // this function: every time a hit is hit
     }
     // TODO: the player has moved, does something happen?
     //player_t plr;
-    //draw_everything(&plr); 
+    draw_everything(p, gem); // TODO: this is good, keep it
     //collect_gem();
 }
 
@@ -227,17 +232,25 @@ int main()
     setcursor(0);
     initdos();
     
+    srand((unsigned)time(NULL));
+    
     player_t plr;
-    draw_everything(&plr);
-    print_rand_ITEM();
+    gem_t gem;
+    gem.gem_x = (rand() % 20) + 1;
+    gem.gem_y = (rand() % 20) + 1;
+    
+    draw_everything(&plr, &gem);
+    //print_rand_ITEM();
+    
     while (1) {
         if (kbhit()) {
             player_t plr;
-            key_hit(&plr);
+            key_hit(&plr, &gem);
             
 
         }
         refresh();
     }    
+    
     return 0;
 }

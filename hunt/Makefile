@@ -1,2 +1,2 @@
 all:
-	cc *.c -lSDL2 -ldos -o hunt
+	cc *.c -I/usr/include -lm -lSDL2 -ldos -o hunt
