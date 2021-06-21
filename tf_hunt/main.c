@@ -57,8 +57,7 @@ int random_y()
 }
 
 
-// returns false if program should terminate
-bool handle_key(int key)
+void handle_key(int key)
 {
     switch ( key )
     {
@@ -68,7 +67,7 @@ bool handle_key(int key)
         case 's': player.y++; break;
         case 'd': player.x++; break;
         
-        default: return true;
+        default: return;
     }
     
     keep_in_bounds(&player.x, &player.y);
@@ -94,7 +93,7 @@ void draw_status_bar(int y)
 {
     textbackground(BLUE);
     textcolor(WHITE);
-    for ( int x = 1; x <= GAME_W; x++ ) {
+    for ( int x = 1; x <= GAME_W; x++ ) { // clear/fill entire line
         gotoxy(x, y);
         putch(' ');
     }
