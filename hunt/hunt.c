@@ -39,20 +39,25 @@
 #define MAX_X       SCREEN_W
 #define MAX_Y       SCREEN_H
 
-#define MIN_X       1
-#define MIN_Y       1
+#define MIN_X           1
+#define MIN_Y           1
+#define MAX_NUM_ITEMS   3
 
 #define OCTAVE      4  
 #define NOTE_VALUE  16  
-#define TEMPO       220   
-#define STARTING_PT 10 
+#define TEMPO       220 
+
+#define OBJ_1       'G' 
+#define OBJ_2       'C' 
+#define OBJ_3       'F' 
+
+
 
 
 // =============================================================================
 // STRUCTS / TYPES / ENUMS
 
-enum ascii // TODO: put this in ascii.h -> make names generic
-{
+enum ascii { // TODO: put this in ascii.h -> make names generic
     CH_VOID,
     CH_SMILY1,
     CH_SMILY2,
@@ -80,6 +85,8 @@ enum ascii // TODO: put this in ascii.h -> make names generic
     // TODO: look at ascii chart and add other potentially useful characters
 };
 
+
+
 // =============================================================================
 // PROTOTYPES (function declarations)
 
@@ -87,25 +94,22 @@ enum ascii // TODO: put this in ascii.h -> make names generic
 // =============================================================================
 // DATA (state) global variables are initialized to 0 by default
 
-bool gem_collected = false; // this is a possibility
+bool item_collected = false; // this is a possibility
 
+typedef struct {
+    int x; 
+    int y;
+}   player_t, entities_t;
 
-// TODO: DRY: single struct to represent game objects
-typedef struct
-{
-    int player_x; // remove reduncant 'player' part of name
-    int player_y;
-} player_t;
-
-typedef struct
-{
-    int gem_x; // TODO: in code, stop using "magic value" (4, 4)
-    int gem_y;
-} gem_t;
-// TODO: gem location data
 
 // =============================================================================
 // FUNCTIONS
+void print_objective()
+{
+    gotoxy(MIN_X, MIN_Y);
+    textcolor(YELLOW);
+    cprintf("G%c", CH_ARROW_UP);
+}
 
 int print_river(int n)
 {
@@ -127,66 +131,67 @@ int print_river(int n)
 
 void sound_collect()
 {
-    play(NOTE_C, OCTAVE, NOTE_VALUE, TEMPO); 
-    play(NOTE_E, OCTAVE, NOTE_VALUE, TEMPO);
-    play(NOTE_G, OCTAVE, NOTE_VALUE, TEMPO);
-}
 
-// TODO: fix param names: capitals are for #defined constants etc: used lowercase
-// TODO: function name: all lowers
-void CHAR_print_item(gem_t *g, int COLOR, char ICON)
-{
-    g->gem_x = 10;
-    g->gem_y = 10;
-    gotoxy(g->gem_x, g->gem_y);
-    textcolor(COLOR);
-    putch(ICON);
-    textcolor(LIGHTGRAY);
+    play(NOTE_G, OCTAVE, NOTE_VALUE, TEMPO);
+    play(NOTE_G_SHARP, OCTAVE, NOTE_VALUE, TEMPO);
+    play(NOTE_G, OCTAVE, NOTE_VALUE, TEMPO);
+    play(NOTE_G_SHARP, OCTAVE, NOTE_VALUE, TEMPO);
+
 }
 
 // TODO: function should do only one thing: draw (no game changes, for instance)
-void draw_everything(player_t *p, gem_t *gem)
+void draw_level(player_t *player, entities_t *flat, entities_t *sharp, entities_t *natural)
 {
+    print_objective();
     
-    gotoxy(20, 1); // TEMP: it helps me visualize x and y
-    cprintf("X");
-    gotoxy(1, 20);
-    cprintf("Y");
-        
-    //p->player_x = rand() % MAX_X;
-    //p->player_y = rand() % MAX_Y;
-    gotoxy(p->player_x, p->player_y);
+    gotoxy(player->x, player->y);
+    textcolor(LIGHTGRAY);
     putch(CH_SMILY1);
-    
-    //gotoxy(1, 1); // DEBUG: player location
-    printf("%d %d\n", p->player_x, p->player_y);
-    
-    gotoxy(gem->gem_x, gem->gem_y);
-    textcolor(LIGHTGREEN);
-    putch(4); // TODO: use constant
+
+    if (!item_collected) { //could this be dryer like an array?
+        gotoxy(flat->x, flat->y);
+        textcolor(MAGENTA);
+        putch(CH_LETTER_B);
+        gotoxy(sharp->x, sharp->y);
+        textcolor(RED);
+        putch(CH_POUND);
+        gotoxy(natural->x, natural->y);
+        textcolor(CYAN);
+        putch(CH_NAK);
+    }     
 }
 
-/*void print_rand_ITEM()
-{
-    int ctime = time(NULL);
-    srand(ctime);
 
-    gem_x = rand() % MAX_X;
-    gem_y = rand() % MAX_Y;    
-   
-    CHAR_print_item(*ptr1, *ptr2, GREEN, CH_DIAMOND);
-}
-*/
-/*void collect_gem()
+void collect_gem(player_t *player, entities_t *flat, entities_t *sharp, entities_t *natural)
 {
-    if ( !gem_collected && player_x == *ptr1 && player_y == *ptr2 ) { // player is on gem!
+    if ( !item_collected && sharp->x == player->x && sharp->y == player->y ) {  // player is on gem!
         // do collect gem stuff
-        gem_collected = true;
+        item_collected = true;
         sound_collect();
-    }
-}*/
+        gotoxy(player->x, player->y);
+        textcolor(LIGHTGRAY);
+        putch(CH_SMILY1);
+    } 
+    
+}
 
-void key_hit(player_t *p, gem_t *gem) // this function: every time a hit is hit
+void draw_random_entities(player_t *player, entities_t *flat, entities_t *sharp, entities_t *natural)
+{
+
+        player->x = (rand() % 20) + 1;
+        player->y = (rand() % 20) + 1;
+
+        flat->x = (rand() % 20) + 1;
+        flat->y = (rand() % 20) + 1;
+
+        sharp->x = (rand() % 20) + 1;
+        sharp->y = (rand() % 20) + 1;
+
+        natural->x = (rand() % 20) + 1;
+        natural->y = (rand() % 20) + 1;
+}
+
+void key_hit(player_t *player, entities_t *flat, entities_t *sharp, entities_t *natural) // this function: every time a hit is hit
 {
     
     clrscr();
@@ -194,36 +199,44 @@ void key_hit(player_t *p, gem_t *gem) // this function: every time a hit is hit
     
     switch (key) {
         case 'w': // TODO: optimize logic for wasd
-            --p->player_y;
-            if (p->player_y < MIN_Y) { // TODO: this is a good use case for clamp()
-                p->player_y = MIN_Y;
-            }
+            --player->y;
+            if (player->y < MIN_Y) {
+                player->y = MIN_Y;
+            }    
             break;
         case 's':
-            ++p->player_y;
-            if (p->player_y > MAX_Y) { 
-                p->player_y = MAX_Y;
-            }
+            ++player->y;
+            if (player->y > MAX_Y) {
+                player->y = MAX_Y;
+            }    
             break;
         case 'a':
-            --p->player_x;
-            if (p->player_x < MIN_X) {
-                p->player_x = MIN_X;
-            }
+            --player->x;
+            if (player->x < MIN_X) {
+                player->x = MIN_X;
+            }    
             break;
         case 'd':
-            ++p->player_x;
-            if (p->player_x > MAX_X) {
-                p->player_x = MAX_X;
-            }
+            ++player->x;
+            if (player->x > MAX_X) {
+                player->x = MAX_X;
+            }    
             break;
         default:
             break;
     }
     // TODO: the player has moved, does something happen?
-    //player_t plr;
-    draw_everything(p, gem); // TODO: this is good, keep it
-    //collect_gem();
+   
+    draw_level(player, flat, sharp, natural); // TODO: this is good, keep it
+    collect_gem(player, flat, sharp, natural);
+    
+    if (item_collected && sharp->x != player->x && sharp->y != player->y) {
+        item_collected = false;
+        clrscr();
+        draw_random_entities(player, flat, sharp, natural);
+        draw_level(player, flat, sharp, natural);
+    } 
+    
 }
 
 int main()
@@ -235,21 +248,22 @@ int main()
     
     srand((unsigned)time(NULL));
     
-    player_t plr;
-    plr.player_x = (rand() % 10) + 1;
-    plr.player_y = (rand() % 10) + 1;
-    gem_t gem;
-    gem.gem_x = (rand() % 20) + 1;
-    gem.gem_y = (rand() % 20) + 1;
+    player_t player;
+    entities_t flat;
+    entities_t sharp;
+    entities_t natural;
     
-    draw_everything(&plr, &gem);
-    //print_rand_ITEM();
+    draw_random_entities(&player, &flat , &sharp, &natural);
+    
+
+    draw_level(&player, &flat, &sharp, &natural);
     
     while (1) {
+        
         if (kbhit()) {
-            player_t plr;
-            key_hit(&plr, &gem);
-            
+            key_hit(&player, &flat, &sharp, &natural);
+           
+    
 
         }
         refresh();
