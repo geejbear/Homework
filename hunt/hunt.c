@@ -18,14 +18,15 @@
  * TODO: item_t struct
  */
 
-#include <dos.h>
-#include <conio.h>
-#include <stdbool.h>
-#include <stdlib.h>
 #include "play.h"
 #include "utility.h"
-#include <time.h>
+
+#include <dos.h>
+#include <conio.h>
+
+#include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
 #include <stdio.h>
 
 
@@ -85,21 +86,35 @@ enum ascii { // TODO: put this in ascii.h -> make names generic
     // TODO: look at ascii chart and add other potentially useful characters
 };
 
+typedef struct
+{
+    int x;
+    int y;
+    
+    // TODO: appearance
+    int ch;
+    int color;
+    
+    // TODO: entity's state
+    bool active;
+} entity_t;
 
-
-// =============================================================================
-// PROTOTYPES (function declarations)
-
+// TODO: function that makes a new entity_t
+// TODO: draw entity function
 
 // =============================================================================
 // DATA (state) global variables are initialized to 0 by default
 
-bool item_collected = false; // this is a possibility
+entity_t player;
 
-typedef struct {
-    int x; 
-    int y;
-}   player_t, entities_t;
+// TODO: use an array:
+entity_t entities[3];
+entity_t flat; // (remove these 3)
+entity_t sharp;
+entity_t natural;
+
+bool item_collected = false; // this gets replaced with struct member (active)
+
 
 
 // =============================================================================
@@ -111,7 +126,7 @@ void print_objective()
     cprintf("G%c", CH_ARROW_UP);
 }
 
-int print_river(int n)
+int print_river(int n) // TODO: save it somewhere else
 {
     clamp(n, 30, 1);
 
@@ -131,106 +146,120 @@ int print_river(int n)
 
 void sound_collect()
 {
-
+    const int tempo = 220; // TODO: change from defines to local...
+    
+    // TODO: use a for loop
     play(NOTE_G, OCTAVE, NOTE_VALUE, TEMPO);
     play(NOTE_G_SHARP, OCTAVE, NOTE_VALUE, TEMPO);
     play(NOTE_G, OCTAVE, NOTE_VALUE, TEMPO);
     play(NOTE_G_SHARP, OCTAVE, NOTE_VALUE, TEMPO);
-
 }
 
-// TODO: function should do only one thing: draw (no game changes, for instance)
-void draw_level(player_t *player, entities_t *flat, entities_t *sharp, entities_t *natural)
+void draw_level()
 {
     print_objective();
     
-    gotoxy(player->x, player->y);
+    gotoxy(player.x, player.y);
     textcolor(LIGHTGRAY);
     putch(CH_SMILY1);
 
     if (!item_collected) { //could this be dryer like an array?
-        gotoxy(flat->x, flat->y);
+        gotoxy(flat.x, flat.y);
         textcolor(MAGENTA);
         putch(CH_LETTER_B);
-        gotoxy(sharp->x, sharp->y);
+        gotoxy(sharp.x, sharp.y);
         textcolor(RED);
         putch(CH_POUND);
-        gotoxy(natural->x, natural->y);
+        gotoxy(natural.x, natural.y);
         textcolor(CYAN);
         putch(CH_NAK);
     }     
 }
 
 
-void collect_gem(player_t *player, entities_t *flat, entities_t *sharp, entities_t *natural)
+void collect_gem()
 {
-    if ( !item_collected && sharp->x == player->x && sharp->y == player->y ) {  // player is on gem!
+    if ( !item_collected && sharp.x == player.x && sharp.y == player.y ) {  // player is on gem!
         // do collect gem stuff
         item_collected = true;
         sound_collect();
-        gotoxy(player->x, player->y);
+        gotoxy(player.x, player.y);
         textcolor(LIGHTGRAY);
         putch(CH_SMILY1);
     } 
     
 }
 
-void draw_random_entities(player_t *player, entities_t *flat, entities_t *sharp, entities_t *natural)
+// returns a random coordinate between 1 and max_value
+int random_coord(int max_value)
 {
-
-        player->x = (rand() % 20) + 1;
-        player->y = (rand() % 20) + 1;
-
-        flat->x = (rand() % 20) + 1;
-        flat->y = (rand() % 20) + 1;
-
-        sharp->x = (rand() % 20) + 1;
-        sharp->y = (rand() % 20) + 1;
-
-        natural->x = (rand() % 20) + 1;
-        natural->y = (rand() % 20) + 1;
+    return (rand() % max_value) + 1;
 }
 
-void key_hit(player_t *player, entities_t *flat, entities_t *sharp, entities_t *natural) // this function: every time a hit is hit
+void draw_random_entities()
+{
+    // TODO: DRY
+    player.x = (rand() % SCREEN_W) + 1;
+    player.y = (rand() % SCREEN_H) + 1;
+    
+    // this is the new version
+    for (int i = 0; i < 3; i++)
+    {
+        entities[i].x = random_coord(SCREEN_W);
+        entities[i].y = random_coord(SCREEN_H);
+    }
+    
+    // (old version, remove)
+    flat.x = (rand() % SCREEN_W) + 1;
+    flat.y = (rand() % SCREEN_H) + 1;
+    
+    sharp.x = (rand() % SCREEN_W) + 1;
+    sharp.y = (rand() % SCREEN_H) + 1;
+    
+    natural.x = (rand() % SCREEN_W) + 1;
+    natural.y = (rand() % SCREEN_H) + 1;
+}
+
+void key_hit() // this function: every time a hit is hit
 {
     
     clrscr();
     int key = getch();
     
     switch (key) {
-        case 'w': // TODO: optimize logic for wasd
-            --player->y;
-            if (player->y < MIN_Y) {
-                player->y = MIN_Y;
+        case 'w': // TODO: optimize logic for wasd (clamp, from utility.h)
+            --player.y;
+            if (player.y < MIN_Y) {
+                player.y = MIN_Y;
             }    
             break;
         case 's':
-            ++player->y;
-            if (player->y > MAX_Y) {
-                player->y = MAX_Y;
+            ++player.y;
+            if (player.y > MAX_Y) {
+                player.y = MAX_Y;
             }    
             break;
         case 'a':
-            --player->x;
-            if (player->x < MIN_X) {
-                player->x = MIN_X;
+            --player.x;
+            if (player.x < MIN_X) {
+                player.x = MIN_X;
             }    
             break;
         case 'd':
-            ++player->x;
-            if (player->x > MAX_X) {
-                player->x = MAX_X;
+            ++player.x;
+            if (player.x > MAX_X) {
+                player.x = MAX_X;
             }    
             break;
         default:
             break;
     }
-    // TODO: the player has moved, does something happen?
+    // the player has moved (potentially)
    
     draw_level(player, flat, sharp, natural); // TODO: this is good, keep it
     collect_gem(player, flat, sharp, natural);
     
-    if (item_collected && sharp->x != player->x && sharp->y != player->y) {
+    if (item_collected && sharp.x != player.x && sharp.y != player.y) {
         item_collected = false;
         clrscr();
         draw_random_entities(player, flat, sharp, natural);
@@ -248,24 +277,21 @@ int main()
     
     srand((unsigned)time(NULL));
     
-    player_t player;
-    entities_t flat;
-    entities_t sharp;
-    entities_t natural;
+    // TODO: set entities' appearance
     
-    draw_random_entities(&player, &flat , &sharp, &natural);
+    draw_random_entities();
+    draw_level();
     
-
-    draw_level(&player, &flat, &sharp, &natural);
-    
+    // game loop structure:
+    // 1. get and handle inputs (keyboard, mouse)
+    // 2. update the game (logic stuff)
+    // 3. redraw
     while (1) {
         
         if (kbhit()) {
-            key_hit(&player, &flat, &sharp, &natural);
-           
-    
-
+            key_hit();
         }
+        
         refresh();
     }    
     

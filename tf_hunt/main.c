@@ -77,8 +77,10 @@ void handle_key(int key)
 void update_game()
 {
     // check each gem: player there?
+    
     for ( int i = 0; i < NUM_GEMS; i++ ) {
-        if ( entities_overlap(&player, &gems[i]) ) {
+        // current gem: gems[i]
+        if ( entities_overlap(&player, &gems[i]) && gems[i].active) {
             // collect it
             gems[i].active = false;
             num_gems_collected++;
