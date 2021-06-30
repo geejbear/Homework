@@ -73,7 +73,9 @@ entity_t flat;
 entity_t sharp;
 entity_t natural;
 
-entity_t entities[3];
+entity_t entities[3] = {ASCII_FACE1, 'b', '#', ASCII_SECTION};
+
+entity_t color[3] = {LIGHTGRAY, MAGENTA, RED, CYAN};
 bool item_collected = false; // this gets replaced with struct member (active)
 
 
@@ -104,19 +106,19 @@ void draw_level()
 {
     print_objective();
     
-    gotoxy(player.x, player.y);
+    gotoxy(entities[0].x, entities[0].y);
     textcolor(LIGHTGRAY);
     putch(ASCII_FACE1);
 
     if (!item_collected) { //could this be dryer like an array?
         
-        gotoxy(flat.x, flat.y);
+        gotoxy(entities[1].x, entities[1].y);
         textcolor(MAGENTA);
         putch('b');
-        gotoxy(sharp.x, sharp.y);
+        gotoxy(entities[2].x, entities[2].y);
         textcolor(RED);
         putch('#');
-        gotoxy(natural.x, natural.y);
+        gotoxy(entities[3].x, entities[3].y);
         textcolor(CYAN);
         putch(ASCII_SECTION);
     }     
@@ -125,11 +127,11 @@ void draw_level()
 
 void collect_gem()
 {
-    if ( !item_collected && sharp.x == player.x && sharp.y == player.y ) {  // player is on gem!
+    if ( !item_collected && entities[2].x == entities[0].x && entities[2].y == entities[0].y ) {  // player is on gem!
         // do collect gem stuff
         item_collected = true;
         sound_collect();
-        gotoxy(player.x, player.y);
+        gotoxy(entities[0].x, entities[0].y);
         textcolor(LIGHTGRAY);
         putch(ASCII_FACE1);
     } 
@@ -144,26 +146,13 @@ int random_coord(int max_value)
 
 void draw_random_entities()
 {
-    // TODO: DRY
-    player.x = (rand() % SCREEN_W) + 1;
-    player.y = (rand() % SCREEN_H) + 1;
-    
     // this is the new version
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i <= 3; i++)
     {
         entities[i].x = random_coord(SCREEN_W);
         entities[i].y = random_coord(SCREEN_H);
     }
     
-    // (old version, remove)
-    flat.x = (rand() % SCREEN_W) + 1;
-    flat.y = (rand() % SCREEN_H) + 1;
-    
-    sharp.x = (rand() % SCREEN_W) + 1;
-    sharp.y = (rand() % SCREEN_H) + 1;
-    
-    natural.x = (rand() % SCREEN_W) + 1;
-    natural.y = (rand() % SCREEN_H) + 1;
 }
 
 void key_hit() // this function: every time a hit is hit
@@ -174,27 +163,27 @@ void key_hit() // this function: every time a hit is hit
     
     switch (key) {
         case 'w': // TODO: optimize logic for wasd (clamp, from utility.h)
-            --player.y;
-            if (player.y < MIN_Y) {
-                player.y = MIN_Y;
+            --entities[0].y;
+            if (entities[0].y < MIN_Y) {
+                entities[0].y = MIN_Y;
             }    
             break;
         case 's':
-            ++player.y;
-            if (player.y > MAX_Y) {
-                player.y = MAX_Y;
+            ++entities[0].y;
+            if (entities[0].y > MAX_Y) {
+                entities[0].y = MAX_Y;
             }    
             break;
         case 'a':
-            --player.x;
-            if (player.x < MIN_X) {
-                player.x = MIN_X;
+            --entities[0].x;
+            if (entities[0].x < MIN_X) {
+                entities[0].x = MIN_X;
             }    
             break;
         case 'd':
-            ++player.x;
-            if (player.x > MAX_X) {
-                player.x = MAX_X;
+            ++entities[0].x;
+            if (entities[0].x > MAX_X) {
+                entities[0].x = MAX_X;
             }    
             break;
         default:
@@ -205,7 +194,7 @@ void key_hit() // this function: every time a hit is hit
     draw_level(); // TODO: this is good, keep it
     collect_gem();
     
-    if (item_collected && sharp.x != player.x && sharp.y != player.y) {
+    if (item_collected && entities[2].x != entities[0].x && entities[2].y != entities[0].y) {
         item_collected = false;
         clrscr();
         draw_random_entities();
