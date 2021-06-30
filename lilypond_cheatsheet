@@ -1,0 +1,24 @@
+- exactly one measure per line, the first note of the measure is the first note on the line, the last is the last
+
+- always a space between notes regardless of whatever stuff is attached to them, e.g ties
+
+- all stuff attached to notes is consecutive, no spaces - es,8([~
+
+you can:
+\repeat unfold 4 { r8 c,8( c') c c c }
+
+which acts as a sort of for loop in:
+
+    r8 c,8( c') c c c 
+    r8 c,8( c') c c c 
+    r8 c,8( c') c c c 
+    r8 c,8( c') c c c 
+
+- leave comments with bar numbers e.g %50
+
+Use on a single voice to do a double line repreat
+\repeat volta 2 {
+}
+
+- use [ ] instead of \autoBeam
+	c16[ d] e[ f]

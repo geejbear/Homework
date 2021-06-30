@@ -1,0 +1,22 @@
+###git cheatsheet###
+
+for pushing and pulling repos:
+
+git status				shows status  
+git add <file>			selects file to be added
+git commit -m ""		commits single files on staging area
+git commit -u ""		commits all files on staging area
+git push origin master	push files
+
+git status				shows status
+git fetch				fetches from one or more repositories
+git pull				updates local files
+
+to update from fork to local repo:
+
+git remote -v
+git add upstream [url]
+git rebase upstream/master
+...then git push that mother
+###if done for the first time###
+git push -f origin master
