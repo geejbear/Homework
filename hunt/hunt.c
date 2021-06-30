@@ -20,6 +20,7 @@
 
 #include "play.h"
 #include "utility.h"
+#include "ascii.h"
 
 #include <dos.h>
 #include <conio.h>
@@ -36,55 +37,16 @@
 #define SCREEN_W    20
 #define SCREEN_H    20
 
-// note: minimum x and y is 1
+// note: minimum x and y is 1 in turbo C
 #define MAX_X       SCREEN_W
 #define MAX_Y       SCREEN_H
 
 #define MIN_X           1
 #define MIN_Y           1
 #define MAX_NUM_ITEMS   3
-
-#define OCTAVE      4  
-#define NOTE_VALUE  16  
-#define TEMPO       220 
-
-#define OBJ_1       'G' 
-#define OBJ_2       'C' 
-#define OBJ_3       'F' 
-
-
-
-
 // =============================================================================
 // STRUCTS / TYPES / ENUMS
 
-enum ascii { // TODO: put this in ascii.h -> make names generic
-    CH_VOID,
-    CH_SMILY1,
-    CH_SMILY2,
-    CH_HEART,
-    CH_DIAMOND,
-    CH_CLOVE,
-    CH_SPADE,
-    CH_SMALL_CIRCLE1,
-    CH_SMALL_CIRCLE2,
-    CH_BIG_CIRCLE1,
-    CH_BIG_CIRCLE2,
-    CH_MALE,
-    CH_FEMALE,
-    CH_QUAVER,
-    CH_SEMIQUAVERS,
-    CH_SPARKLE,
-    CH_NAK = 21,
-    CH_BLOCK,
-    CH_ARROW_UP = 24,
-    CH_ARROW_DOWN,
-    CH_ARROW_LEFT,
-    CH_ARROW_RIGHT,
-    CH_POUND = 35,
-    CH_LETTER_B = 98,
-    // TODO: look at ascii chart and add other potentially useful characters
-};
 
 typedef struct
 {
@@ -107,12 +69,11 @@ typedef struct
 
 entity_t player;
 
-// TODO: use an array:
-entity_t entities[3];
-entity_t flat; // (remove these 3)
+entity_t flat;
 entity_t sharp;
 entity_t natural;
 
+entity_t entities[3];
 bool item_collected = false; // this gets replaced with struct member (active)
 
 
@@ -123,36 +84,20 @@ void print_objective()
 {
     gotoxy(MIN_X, MIN_Y);
     textcolor(YELLOW);
-    cprintf("G%c", CH_ARROW_UP);
-}
-
-int print_river(int n) // TODO: save it somewhere else
-{
-    clamp(n, 30, 1);
-
-    int *fib = malloc( n * sizeof(int) );
-    fib[0] = 1;
-    fib[1] = 1;
-
-    for (int i = 2; i < n; i++) {
-        fib[i] = fib[i - 1] + fib[i - 2];
-        cprintf("%d\n", fib[i]);
-    }
-
-    free(fib);
-
-    return 0;
+    cprintf("G%c", ASCII_UPARROW);
 }
 
 void sound_collect()
 {
-    const int tempo = 220; // TODO: change from defines to local...
+    const int tempo = 220; 
+    const int note_value = 16; 
+    const int octave = 4; 
     
-    // TODO: use a for loop
-    play(NOTE_G, OCTAVE, NOTE_VALUE, TEMPO);
-    play(NOTE_G_SHARP, OCTAVE, NOTE_VALUE, TEMPO);
-    play(NOTE_G, OCTAVE, NOTE_VALUE, TEMPO);
-    play(NOTE_G_SHARP, OCTAVE, NOTE_VALUE, TEMPO);
+    for (int i = 0; i < 2; i++) {
+        play(NOTE_G, octave, note_value, tempo);
+        play(NOTE_G_SHARP, octave, note_value, tempo);
+    }
+
 }
 
 void draw_level()
@@ -161,18 +106,19 @@ void draw_level()
     
     gotoxy(player.x, player.y);
     textcolor(LIGHTGRAY);
-    putch(CH_SMILY1);
+    putch(ASCII_FACE1);
 
     if (!item_collected) { //could this be dryer like an array?
+        
         gotoxy(flat.x, flat.y);
         textcolor(MAGENTA);
-        putch(CH_LETTER_B);
+        putch('b');
         gotoxy(sharp.x, sharp.y);
         textcolor(RED);
-        putch(CH_POUND);
+        putch('#');
         gotoxy(natural.x, natural.y);
         textcolor(CYAN);
-        putch(CH_NAK);
+        putch(ASCII_SECTION);
     }     
 }
 
@@ -185,7 +131,7 @@ void collect_gem()
         sound_collect();
         gotoxy(player.x, player.y);
         textcolor(LIGHTGRAY);
-        putch(CH_SMILY1);
+        putch(ASCII_FACE1);
     } 
     
 }
@@ -256,14 +202,14 @@ void key_hit() // this function: every time a hit is hit
     }
     // the player has moved (potentially)
    
-    draw_level(player, flat, sharp, natural); // TODO: this is good, keep it
-    collect_gem(player, flat, sharp, natural);
+    draw_level(); // TODO: this is good, keep it
+    collect_gem();
     
     if (item_collected && sharp.x != player.x && sharp.y != player.y) {
         item_collected = false;
         clrscr();
-        draw_random_entities(player, flat, sharp, natural);
-        draw_level(player, flat, sharp, natural);
+        draw_random_entities();
+        draw_level();
     } 
     
 }
