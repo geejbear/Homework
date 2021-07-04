@@ -34,8 +34,8 @@
 // =============================================================================
 // DEFINES
 
-#define SCREEN_W    20
-#define SCREEN_H    20
+#define SCREEN_W    16
+#define SCREEN_H    16
 
 // note: minimum x and y is 1 in turbo C
 #define MAX_X       SCREEN_W
@@ -43,7 +43,9 @@
 
 #define MIN_X           1
 #define MIN_Y           1
-#define MAX_NUM_ITEMS   3
+
+#define MAX_NUM_ITEMS   4
+
 // =============================================================================
 // STRUCTS / TYPES / ENUMS
 
@@ -52,12 +54,8 @@ typedef struct
 {
     int x;
     int y;
-    
-    // TODO: appearance
     int ch;
     int color;
-    
-    // TODO: entity's state
     bool active;
 } entity_t;
 
@@ -67,21 +65,17 @@ typedef struct
 // =============================================================================
 // DATA (state) global variables are initialized to 0 by default
 
-entity_t player;
+entity_t entities[MAX_NUM_ITEMS]; 
+int colors[MAX_NUM_ITEMS] = {LIGHTGRAY, MAGENTA, RED, CYAN};
+int items[MAX_NUM_ITEMS] = {ASCII_FACE1, 'b', '#', ASCII_SECTION}; 
 
-entity_t flat;
-entity_t sharp;
-entity_t natural;
-
-entity_t entities[3] = {ASCII_FACE1, 'b', '#', ASCII_SECTION};
-
-entity_t color[3] = {LIGHTGRAY, MAGENTA, RED, CYAN};
 bool item_collected = false; // this gets replaced with struct member (active)
 
 
 
 // =============================================================================
 // FUNCTIONS
+
 void print_objective()
 {
     gotoxy(MIN_X, MIN_Y);
@@ -106,22 +100,14 @@ void draw_level()
 {
     print_objective();
     
-    gotoxy(entities[0].x, entities[0].y);
-    textcolor(LIGHTGRAY);
-    putch(ASCII_FACE1);
-
     if (!item_collected) { //could this be dryer like an array?
-        
-        gotoxy(entities[1].x, entities[1].y);
-        textcolor(MAGENTA);
-        putch('b');
-        gotoxy(entities[2].x, entities[2].y);
-        textcolor(RED);
-        putch('#');
-        gotoxy(entities[3].x, entities[3].y);
-        textcolor(CYAN);
-        putch(ASCII_SECTION);
-    }     
+        for (int i = 0; i < MAX_NUM_ITEMS; i++) {
+            gotoxy(entities[i].x, entities[i].y);
+            textcolor(colors[i]);
+            putch(items[i]);
+        }    
+    }    
+
 }
 
 
@@ -155,42 +141,14 @@ void draw_random_entities()
     
 }
 
-void key_hit() // this function: every time a hit is hit
+void keep_in_bounds(int x, int y)
 {
-    
-    clrscr();
-    int key = getch();
-    
-    switch (key) {
-        case 'w': // TODO: optimize logic for wasd (clamp, from utility.h)
-            --entities[0].y;
-            if (entities[0].y < MIN_Y) {
-                entities[0].y = MIN_Y;
-            }    
-            break;
-        case 's':
-            ++entities[0].y;
-            if (entities[0].y > MAX_Y) {
-                entities[0].y = MAX_Y;
-            }    
-            break;
-        case 'a':
-            --entities[0].x;
-            if (entities[0].x < MIN_X) {
-                entities[0].x = MIN_X;
-            }    
-            break;
-        case 'd':
-            ++entities[0].x;
-            if (entities[0].x > MAX_X) {
-                entities[0].x = MAX_X;
-            }    
-            break;
-        default:
-            break;
-    }
-    // the player has moved (potentially)
-   
+    clamp(x, MIN_X, SCREEN_W);
+    clamp(y, MIN_Y, SCREEN_H);
+}
+
+void redraw_level()
+{
     draw_level(); // TODO: this is good, keep it
     collect_gem();
     
@@ -200,7 +158,21 @@ void key_hit() // this function: every time a hit is hit
         draw_random_entities();
         draw_level();
     } 
+}
+
+void key_hit(int key) 
+{
+    switch (key) {
+        case 'w': --entities[0].y; break;
+        case 's': ++entities[0].y; break;
+        case 'a': --entities[0].x; break;
+        case 'd': ++entities[0].x; break;
+        default: break;
+
+    }
     
+    clamp(entities[0].x, MIN_X, SCREEN_W);
+    //keep_in_bounds(entities[0].x, entities[0].y);
 }
 
 int main()
@@ -224,7 +196,9 @@ int main()
     while (1) {
         
         if (kbhit()) {
-            key_hit();
+            clrscr();
+            key_hit(getch());
+            redraw_level();
         }
         
         refresh();
