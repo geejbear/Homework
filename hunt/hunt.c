@@ -98,8 +98,6 @@ void sound_collect()
 
 void draw_level()
 {
-    print_objective();
-    
     if (!item_collected) { //could this be dryer like an array?
         for (int i = 0; i < MAX_NUM_ITEMS; i++) {
             gotoxy(entities[i].x, entities[i].y);
@@ -141,7 +139,7 @@ void draw_random_entities()
     
 }
 
-void keep_in_bounds(int x, int y)
+void keep_in_bounds(int *x, int *y)
 {
     clamp(x, MIN_X, SCREEN_W);
     clamp(y, MIN_Y, SCREEN_H);
@@ -149,9 +147,7 @@ void keep_in_bounds(int x, int y)
 
 void redraw_level()
 {
-    draw_level(); // TODO: this is good, keep it
-    collect_gem();
-    
+   
     if (item_collected && entities[2].x != entities[0].x && entities[2].y != entities[0].y) {
         item_collected = false;
         clrscr();
@@ -171,8 +167,7 @@ void key_hit(int key)
 
     }
     
-    clamp(entities[0].x, MIN_X, SCREEN_W);
-    //keep_in_bounds(entities[0].x, entities[0].y);
+    keep_in_bounds(&entities[0].x, &entities[0].y);  
 }
 
 int main()
@@ -198,6 +193,9 @@ int main()
         if (kbhit()) {
             clrscr();
             key_hit(getch());
+            print_objective();
+            draw_level();
+            collect_gem();
             redraw_level();
         }
         
