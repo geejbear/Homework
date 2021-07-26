@@ -15,10 +15,11 @@
 
 #include <dos.h>
 #include <conio.h>
-
+#include "play.h"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+
 
 #define SCREEN_W    16
 #define SCREEN_H    16
@@ -41,18 +42,24 @@ typedef struct
 // initialize a struct all at once
 ball_t ball = { SCREEN_W / 2, SCREEN_H / 4, 1, 1 };
     
-void get_input()
+void GetInput(int key)
 {
-    
+    switch (key) {
+        case 'w': --ball.y; break;
+        case 's': ++ball.y; break;
+        case 'a': --ball.x; break;
+        case 'd': ++ball.x; break;
+        default: break;
+    }
 }
 
-void MoveBallBack()
+void BounceBallBack() 
 {
     ball.x -= ball.dx;  // put it back
     ball.y -= ball.dy;  // put it back
 }
 
-void update_game()
+void UpdateGame()
 {
     // update the ball's position
     ball.x += ball.dx;
@@ -62,20 +69,24 @@ void update_game()
     
     // handle whether ball when off screen:
     
-    if ( ball.x > MAX_X ) { // ball went off right side of screen
-        MoveBallBack();
+    if (( ball.x > MAX_X ) || (ball.x < MIN_X))  { 
+        // ball went off right side of screen
+        BounceBallBack();
         ball.dx = -ball.dx; // bounce it back
     }
     
-    if ( ball.y > MAX_Y ) { // ball went off right side of screen
-        MoveBallBack();
+    if (( ball.y > MAX_Y ) || (ball.y < MIN_Y)) { // ball went off right side of screen
+        BounceBallBack();
         ball.dy = -ball.dy; // bounce it back
     }
-    
+
     // TODO: handle ball off screen top and left
 }
 
-void draw_game()
+
+    
+
+void DrawGame()
 {
     clrscr();
     gotoxy(ball.x, ball.y);
@@ -94,14 +105,14 @@ int main()
     while (1) {
         
         if ( kbhit() ) {
-            get_input();
+            GetInput(getch());
         }
 
-        if (ticks % 20 == 0 ) {
-            update_game();
+        if (ticks % 10 == 0 ) {
+            UpdateGame();
         }
         
-        draw_game();
+        DrawGame();
         
         refresh();
         ticks++;
