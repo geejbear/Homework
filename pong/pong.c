@@ -13,9 +13,11 @@
 // BUGS
 // - ...
 
+#include "play.h"
+#include "utility.h"
+
 #include <dos.h>
 #include <conio.h>
-#include "play.h"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -28,6 +30,8 @@
 #define MAX_Y       SCREEN_H
 #define MIN_X           1
 #define MIN_Y           1
+#define CHAR_PADDLE     10
+
 
 // game data
 
@@ -39,16 +43,26 @@ typedef struct
     int dy;
 } ball_t;
 
+typedef struct
+{
+    int x;
+    int y;
+    char ch;
+    int color;
+} paddle_t;
+
 // initialize a struct all at once
 ball_t ball = { SCREEN_W / 2, SCREEN_H / 4, 1, 1 };
+paddle_t paddle = {MIN_X, SCREEN_H/2};
     
+
 void GetInput(int key)
 {
     switch (key) {
-        case 'w': --ball.y; break;
-        case 's': ++ball.y; break;
-        case 'a': --ball.x; break;
-        case 'd': ++ball.x; break;
+        case 'w': --paddle.y; break;
+        case 's': ++paddle.y; break;
+        //case 'a': --paddle.x; break;
+        //case 'd': ++paddle.x; break;
         default: break;
     }
 }
@@ -83,14 +97,41 @@ void UpdateGame()
     // TODO: handle ball off screen top and left
 }
 
-
+void KeepPaddleInBounds()
+{
     
+
+    if ((paddle.x > MIN_X) || (paddle.x < MIN_X)) {
+        paddle.x = MIN_X;
+
+    }
+
+    if (paddle.y < MIN_Y) {
+        paddle.y = MIN_Y;
+
+    }
+    
+    if (paddle.y > MAX_Y - 2) {
+        paddle.y = MAX_Y - 2;
+
+    }
+}
 
 void DrawGame()
 {
     clrscr();
     gotoxy(ball.x, ball.y);
+    textcolor(WHITE);
     putch(7);
+
+    gotoxy(paddle.x, paddle.y);
+    textcolor(RED);
+    for (int i = 0; i < 3; i++) {
+        putch(CHAR_PADDLE);
+        cprintf("\n");
+    }
+    KeepPaddleInBounds();
+
 }
 
 int main()
@@ -103,7 +144,6 @@ int main()
     
     int ticks = 0;
     while (1) {
-        
         if ( kbhit() ) {
             GetInput(getch());
         }
@@ -111,9 +151,7 @@ int main()
         if (ticks % 10 == 0 ) {
             UpdateGame();
         }
-        
         DrawGame();
-        
         refresh();
         ticks++;
     }
