@@ -1,7 +1,8 @@
 TARGET = $(shell basename $(CURDIR))
 LIBS = -lm -lSDL2 -ldos
-INCL = -I/usr/include -I../play -I../utility
-#SRC = *.c ../play/play.c ../utility/utility.c
+INCL = -I../play -I../utility
+#INCL += -I/usr/include #delete if not needed
+SRC = *.c ../play/play.c ../utility/utility.c
 
 all:
-	cc pong.c play.c $(SRC) $(INCL) $(LIBS) -o $(TARGET)
+	cc $(SRC) $(INCL) $(LIBS) -o $(TARGET)

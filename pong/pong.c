@@ -13,21 +13,24 @@
 // BUGS
 // - ...
 
-#include "play.h"
-#include "utility.h"
+// "" includes: relative to current path
+// <> includes: where the compiler looks for headers (-I)
+#include <play.h>
+#include <utility.h>
 
 #include <dos.h>
 #include <conio.h>
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 
-#define SCREEN_W    16
-#define SCREEN_H    16
+#define SCREEN_W        16
+#define SCREEN_H        16
 // note: minimum x and y is 1 in turbo C
-#define MAX_X       SCREEN_W
-#define MAX_Y       SCREEN_H
+#define MAX_X           SCREEN_W
+#define MAX_Y           SCREEN_H
 #define MIN_X           1
 #define MIN_Y           1
 #define CHAR_PADDLE     10
@@ -42,30 +45,38 @@ typedef struct
     int y;
     int dx;
     int dy;
-} ball_t;
+} Ball;
 
+// TODO: ball and paddle are both
 typedef struct
 {
     int x;
     int y;
     char ch;
     int color;
-} paddle_t;
+} Paddle;
 
 // initialize a struct all at once
-ball_t ball = { SCREEN_W / 2, SCREEN_H / 4, 1, 1 };
-paddle_t paddle = { MIN_X, SCREEN_H/2, 0, 0};
-    
+Ball ball = { SCREEN_W / 2, SCREEN_H / 4, 1, 1 };
+
+// TODO: second paddle
+Paddle paddle = { MIN_X, SCREEN_H/2, 0, 0 };
 
 void GetInput(int key)
 {
     switch (key) {
         case 'w': --paddle.y; break;
         case 's': ++paddle.y; break;
+        case 't': {
+            int ch = getscreench(paddle.x, paddle.y);
+            printf("ch is: %d\n", ch);
+            break;
+        }
         default: break;
     }
 }
 
+// TODO: MoveBallToPreviousPosition
 void BounceBallBack() 
 {
     ball.x -= ball.dx;  // put it back
@@ -100,7 +111,7 @@ void UpdateGame()
 void BallAndPaddleOverlap()
 {
      //bounce back if paddle hits ball
-    if (ball.y == paddle.y && paddle.x)  {
+    if (ball.y == paddle.y && ball.x == paddle.x)  {
         //ball.x++;
         //BounceBallBack();
         play(NOTE_C, 4, 4, 120);
