@@ -31,6 +31,7 @@
 #define MIN_X           1
 #define MIN_Y           1
 #define CHAR_PADDLE     10
+#define PADDLE_SIZE     3
 
 
 // game data
@@ -53,7 +54,7 @@ typedef struct
 
 // initialize a struct all at once
 ball_t ball = { SCREEN_W / 2, SCREEN_H / 4, 1, 1 };
-paddle_t paddle = {MIN_X, SCREEN_H/2};
+paddle_t paddle = { MIN_X, SCREEN_H/2, 0, 0};
     
 
 void GetInput(int key)
@@ -61,8 +62,6 @@ void GetInput(int key)
     switch (key) {
         case 'w': --paddle.y; break;
         case 's': ++paddle.y; break;
-        //case 'a': --paddle.x; break;
-        //case 'd': ++paddle.x; break;
         default: break;
     }
 }
@@ -83,24 +82,36 @@ void UpdateGame()
     
     // handle whether ball when off screen:
     
-    if (( ball.x > MAX_X ) || (ball.x < MIN_X))  { 
+    if (( ball.x == MAX_X + 1 ) || (ball.x == MIN_X - 1))  { 
         // ball went off right side of screen
         BounceBallBack();
         ball.dx = -ball.dx; // bounce it back
     }
     
-    if (( ball.y > MAX_Y ) || (ball.y < MIN_Y)) { // ball went off right side of screen
+    if (( ball.y == MAX_Y + 1 ) || (ball.y == MIN_Y - 1)) { // ball went off right side of screen
         BounceBallBack();
         ball.dy = -ball.dy; // bounce it back
     }
 
+
     // TODO: handle ball off screen top and left
+}
+
+void BallAndPaddleOverlap()
+{
+     //bounce back if paddle hits ball
+    if (ball.y == paddle.y && paddle.x)  {
+        //ball.x++;
+        //BounceBallBack();
+        play(NOTE_C, 4, 4, 120);
+        //ball.dy = -ball.dy;
+    }
 }
 
 void KeepPaddleInBounds()
 {
     
-
+    //TODO: use clamp()
     if ((paddle.x > MIN_X) || (paddle.x < MIN_X)) {
         paddle.x = MIN_X;
 
@@ -126,7 +137,7 @@ void DrawGame()
 
     gotoxy(paddle.x, paddle.y);
     textcolor(RED);
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < PADDLE_SIZE; i++) {
         putch(CHAR_PADDLE);
         cprintf("\n");
     }
@@ -151,6 +162,7 @@ int main()
         if (ticks % 10 == 0 ) {
             UpdateGame();
         }
+        
         DrawGame();
         refresh();
         ticks++;
