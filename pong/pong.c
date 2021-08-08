@@ -11,7 +11,7 @@
 // - ...
 
 // BUGS
-// - ...
+// - paddle blinks when it reaches clamp limit
 
 // "" includes: relative to current path
 // <> includes: where the compiler looks for headers (-I)
@@ -45,33 +45,31 @@ typedef struct
     int y;
     int dx;
     int dy;
-} Ball;
-
-// TODO: ball and paddle are both
-typedef struct
-{
-    int x;
-    int y;
     char ch;
     int color;
-} Paddle;
+} Ball, Paddle;
+
 
 // initialize a struct all at once
 Ball ball = { SCREEN_W / 2, SCREEN_H / 4, 1, 1 };
 
 // TODO: second paddle
-Paddle paddle = { MIN_X, SCREEN_H/2, 0, 0 };
+Paddle paddle_left = { MIN_X, SCREEN_H/2, 0, 0 };
+Paddle paddle_right = { MAX_X, SCREEN_H/2, 0, 0 };
+
 
 void GetInput(int key)
 {
     switch (key) {
-        case 'w': --paddle.y; break;
-        case 's': ++paddle.y; break;
-        case 't': {
-            int ch = getscreench(paddle.x, paddle.y);
-            printf("ch is: %d\n", ch);
-            break;
-        }
+        case 'w': --paddle_left.y; break;
+        case 's': ++paddle_left.y; break;
+        case 'i': --paddle_right.y; break;
+        case 'k': ++paddle_right.y; break;
+        //case 't': {
+        //    int ch = unsigned getscreench(paddle_left.x, paddle_left.y);
+        //    printf("ch is: %d\n", ch);
+        //    break;
+        //}
         default: break;
     }
 }
@@ -111,7 +109,7 @@ void UpdateGame()
 void BallAndPaddleOverlap()
 {
      //bounce back if paddle hits ball
-    if (ball.y == paddle.y && ball.x == paddle.x)  {
+    if (ball.y == paddle_left.y && ball.x == paddle_left.x)  {
         //ball.x++;
         //BounceBallBack();
         play(NOTE_C, 4, 4, 120);
@@ -119,25 +117,49 @@ void BallAndPaddleOverlap()
     }
 }
 
-void KeepPaddleInBounds()
+void KeepRightPaddleInBounds(int *x, int *y, int *z)
 {
-    
-    //TODO: use clamp()
-    if ((paddle.x > MIN_X) || (paddle.x < MIN_X)) {
-        paddle.x = MIN_X;
-
-    }
-
-    if (paddle.y < MIN_Y) {
-        paddle.y = MIN_Y;
-
-    }
-    
-    if (paddle.y > MAX_Y - 2) {
-        paddle.y = MAX_Y - 2;
-
-    }
+    clamp(x, MAX_X, MAX_X);
+    clamp(y, MIN_Y, MAX_Y);
+    clamp(z, MIN_Y - 2, MAX_Y - 2);
 }
+
+void KeepLeftPaddleInBounds(int *x, int *y, int *z)
+{
+    clamp(x, MIN_X, MIN_X);
+    clamp(y, MIN_Y, MAX_Y);
+    clamp(z, MIN_Y - 2, MAX_X - 2);
+}
+
+void DrawRightPaddle()
+{
+    gotoxy(paddle_right.x, paddle_right.y);
+    textcolor(GREEN);
+    
+    int count = 1;
+    
+    for (int i = 0; i < PADDLE_SIZE; i++) {
+        putch(CHAR_PADDLE);
+        cprintf("\n");
+        gotoxy(paddle_right.x, paddle_right.y + count);
+        count++;
+    }    
+    KeepRightPaddleInBounds(&paddle_right.x, &paddle_right.y, &paddle_right.y);
+}
+
+void DrawLeftPaddle() 
+{
+    gotoxy(paddle_left.x, paddle_left.y);
+    textcolor(RED);
+    
+    for (int i = 0; i < PADDLE_SIZE; i++) {
+        putch(CHAR_PADDLE);
+        cprintf("\n");
+    }
+
+    KeepLeftPaddleInBounds(&paddle_left.x, &paddle_left.y, &paddle_left.y);
+}
+
 
 void DrawGame()
 {
@@ -146,14 +168,8 @@ void DrawGame()
     textcolor(WHITE);
     putch(7);
 
-    gotoxy(paddle.x, paddle.y);
-    textcolor(RED);
-    for (int i = 0; i < PADDLE_SIZE; i++) {
-        putch(CHAR_PADDLE);
-        cprintf("\n");
-    }
-    KeepPaddleInBounds();
-
+    DrawLeftPaddle();
+    DrawRightPaddle();
 }
 
 int main()
