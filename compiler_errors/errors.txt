@@ -1,0 +1,3 @@
+undeclared identifier
+-> the compiler think a variable name, etc, has not been declared
+examples: a misspelled variable name, a function is in another file which hasn't been #include'd
