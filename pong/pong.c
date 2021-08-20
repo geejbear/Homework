@@ -52,11 +52,32 @@ typedef struct
 
 
 // initialize a struct all at once
-GameObject ball = { SCREEN_W / 2, SCREEN_H / 4, 1, 1 };
+GameObject ball = { 
+    SCREEN_W / 2, 
+    SCREEN_H / 4, 
+    1, 
+    1,
+    0,
+    0, 
+};
 
-// TODO: second paddle
-GameObject paddle_left = { MIN_X, SCREEN_H/2, 0, 0 };
-GameObject paddle_right = { MAX_X, SCREEN_H/2, 0, 0 };
+GameObject paddle_left = { 
+    MIN_X, 
+    SCREEN_H/2, 
+    0, 
+    0,
+    CHAR_PADDLE,
+    RED, 
+};
+
+GameObject paddle_right = { 
+    MAX_X, 
+    SCREEN_H/2, 
+    0, 
+    0,
+    CHAR_PADDLE,
+    GREEN, 
+};
 
 
 void GetInput(int key)
@@ -125,16 +146,6 @@ void KeepPaddleInBounds(int loc_x, int loc_y, int *x, int *y, int *z)
     clamp(z, MIN_Y - 2, MAX_Y - 2);
 }
 
-<<<<<<< HEAD
-void DrawRightPaddle()//TODO
-=======
-void KeepLeftPaddleInBounds(int *x, int *y, int *z)
-{
-    clamp(x, MIN_X, MIN_X);
-    clamp(y, MIN_Y, MAX_Y);
-    clamp(z, MIN_Y - 2, MAX_X - 2);
-}
-
 /*
  Alt approach
 L PADDLE: 10
@@ -151,7 +162,6 @@ L PADDLE: 10
 */
 
 void DrawRightPaddle()
->>>>>>> 524ebe18f597339698efd37ec105673b78682fa5
 {
     gotoxy(paddle_right.x, paddle_right.y);
     textcolor(GREEN);
