@@ -17,6 +17,7 @@
 // <> includes: where the compiler looks for headers (-I)
 #include <play.h>
 #include <utility.h>
+#include "ascii.h"
 
 #include <dos.h>
 #include <conio.h>
@@ -47,15 +48,15 @@ typedef struct
     int dy;
     char ch;
     int color;
-} Ball, Paddle;
+} GameObject;
 
 
 // initialize a struct all at once
-Ball ball = { SCREEN_W / 2, SCREEN_H / 4, 1, 1 };
+GameObject ball = { SCREEN_W / 2, SCREEN_H / 4, 1, 1 };
 
 // TODO: second paddle
-Paddle paddle_left = { MIN_X, SCREEN_H/2, 0, 0 };
-Paddle paddle_right = { MAX_X, SCREEN_H/2, 0, 0 };
+GameObject paddle_left = { MIN_X, SCREEN_H/2, 0, 0 };
+GameObject paddle_right = { MAX_X, SCREEN_H/2, 0, 0 };
 
 
 void GetInput(int key)
@@ -65,11 +66,11 @@ void GetInput(int key)
         case 's': ++paddle_left.y; break;
         case 'i': --paddle_right.y; break;
         case 'k': ++paddle_right.y; break;
-        //case 't': {
-        //    int ch = unsigned getscreench(paddle_left.x, paddle_left.y);
-        //    printf("ch is: %d\n", ch);
-        //    break;
-        //}
+        case 't': {
+            int ch = (unsigned)getscreench(paddle_left.x, paddle_left.y);
+            printf("ch is: %d\n", ch);
+            break;
+        }
         default: break;
     }
 }
@@ -117,21 +118,14 @@ void BallAndPaddleOverlap()
     }
 }
 
-void KeepRightPaddleInBounds(int *x, int *y, int *z)
+void KeepPaddleInBounds(int loc_x, int loc_y, int *x, int *y, int *z)
 {
-    clamp(x, MAX_X, MAX_X);
+    clamp(x, loc_x, loc_y);
     clamp(y, MIN_Y, MAX_Y);
     clamp(z, MIN_Y - 2, MAX_Y - 2);
 }
 
-void KeepLeftPaddleInBounds(int *x, int *y, int *z)
-{
-    clamp(x, MIN_X, MIN_X);
-    clamp(y, MIN_Y, MAX_Y);
-    clamp(z, MIN_Y - 2, MAX_X - 2);
-}
-
-void DrawRightPaddle()
+void DrawRightPaddle()//TODO
 {
     gotoxy(paddle_right.x, paddle_right.y);
     textcolor(GREEN);
@@ -144,7 +138,7 @@ void DrawRightPaddle()
         gotoxy(paddle_right.x, paddle_right.y + count);
         count++;
     }    
-    KeepRightPaddleInBounds(&paddle_right.x, &paddle_right.y, &paddle_right.y);
+    KeepPaddleInBounds(MAX_X, MAX_Y, &paddle_right.x, &paddle_right.y, &paddle_right.y);
 }
 
 void DrawLeftPaddle() 
@@ -157,7 +151,7 @@ void DrawLeftPaddle()
         cprintf("\n");
     }
 
-    KeepLeftPaddleInBounds(&paddle_left.x, &paddle_left.y, &paddle_left.y);
+    KeepPaddleInBounds(MIN_X, MIN_Y, &paddle_left.x, &paddle_left.y, &paddle_left.y);
 }
 
 
