@@ -125,13 +125,40 @@ void KeepPaddleInBounds(int loc_x, int loc_y, int *x, int *y, int *z)
     clamp(z, MIN_Y - 2, MAX_Y - 2);
 }
 
+<<<<<<< HEAD
 void DrawRightPaddle()//TODO
+=======
+void KeepLeftPaddleInBounds(int *x, int *y, int *z)
+{
+    clamp(x, MIN_X, MIN_X);
+    clamp(y, MIN_Y, MAX_Y);
+    clamp(z, MIN_Y - 2, MAX_X - 2);
+}
+
+/*
+ Alt approach
+L PADDLE: 10
+ 10
+ 11
+ 12
+ 
+ for ( int y = paddle.y; y < paddle.y + PADDLE_H; y++ )
+ {
+    gotoxy(paddle.x, y)
+    ...
+ }
+ 
+*/
+
+void DrawRightPaddle()
+>>>>>>> 524ebe18f597339698efd37ec105673b78682fa5
 {
     gotoxy(paddle_right.x, paddle_right.y);
     textcolor(GREEN);
     
     int count = 1;
     
+    // gotoxy is the answer for location, i is already the counter for y
     for (int i = 0; i < PADDLE_SIZE; i++) {
         putch(CHAR_PADDLE);
         cprintf("\n");
