@@ -139,11 +139,11 @@ void BallAndPaddleOverlap()
     }
 }
 
-void KeepObjectInBounds(int loc_x, int loc_y, int *x, int *y, int *z)
+void KeepObjectInBounds(int loc_x, int loc_y, int *x, int *y)
 {
     clamp(x, loc_x, loc_y);
     clamp(y, MIN_Y, MAX_Y);
-    clamp(z, MIN_Y - 2, MAX_Y - 2);
+    clamp(y, MIN_Y - 2, MAX_Y - 2);
 }
 
 /*
@@ -175,7 +175,7 @@ void DrawRightPaddle()
         gotoxy(paddle_right.x, paddle_right.y + count);
         count++;
     }    
-    KeepObjectInBounds(MAX_X, MAX_Y, &paddle_right.x, &paddle_right.y, &paddle_right.y);
+    KeepObjectInBounds(MAX_X, MAX_Y, &paddle_right.x, &paddle_right.y);
 }
 
 void DrawLeftPaddle() 
@@ -188,7 +188,7 @@ void DrawLeftPaddle()
         cprintf("\n");
     }
 
-    KeepObjectInBounds(MIN_X, MIN_Y, &paddle_left.x, &paddle_left.y, &paddle_left.y);
+    KeepObjectInBounds(MIN_X, MIN_Y, &paddle_left.x, &paddle_left.y);
 }
 
 
