@@ -161,36 +161,18 @@ L PADDLE: 10
  
 */
 
-void DrawRightPaddle()
+void DrawPaddle(int paddle_loc_x, int paddle_loc_y, int limit_x, int limit_y)
 {
-    gotoxy(paddle_right.x, paddle_right.y);
-    textcolor(GREEN);
-    
+    gotoxy(paddle_loc_x, paddle_loc_y);
     int count = 1;
-    
-    // gotoxy is the answer for location, i is already the counter for y
-    for (int i = 0; i < PADDLE_SIZE; i++) {
+    for ( int y = paddle_left.y; y < paddle_left.y + PADDLE_SIZE; y++ ) {
         putch(CHAR_PADDLE);
-        cprintf("\n");
-        gotoxy(paddle_right.x, paddle_right.y + count);
+        gotoxy(paddle_loc_x, paddle_loc_y + count);
         count++;
-    }    
-    KeepObjectInBounds(MAX_X, MAX_Y, &paddle_right.x, &paddle_right.y);
+        }
+
+    //KeepObjectInBounds(limit_x, limit_y, &paddle_x, &paddle_y);
 }
-
-void DrawLeftPaddle() 
-{
-    gotoxy(paddle_left.x, paddle_left.y);
-    textcolor(RED);
-    
-    for (int i = 0; i < PADDLE_SIZE; i++) {
-        putch(CHAR_PADDLE);
-        cprintf("\n");
-    }
-
-    KeepObjectInBounds(MIN_X, MIN_Y, &paddle_left.x, &paddle_left.y);
-}
-
 
 void DrawGame()
 {
@@ -199,8 +181,8 @@ void DrawGame()
     textcolor(WHITE);
     putch(7);
 
-    DrawLeftPaddle();
-    DrawRightPaddle();
+    DrawPaddle(paddle_left.x, paddle_left.y, MIN_X, MAX_Y);
+    DrawPaddle(paddle_right.x, paddle_right.y, MAX_X, MAX_Y);
 }
 
 int main()
