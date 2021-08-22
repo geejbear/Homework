@@ -36,6 +36,8 @@
 #define MIN_Y           1
 #define CHAR_PADDLE     10
 #define PADDLE_SIZE     3
+#define CHAR_BALL       7
+
 
 
 // game data
@@ -53,47 +55,51 @@ typedef struct
 
 // initialize a struct all at once
 GameObject ball = { 
-    SCREEN_W / 2, 
-    SCREEN_H / 4, 
-    1, 
-    1,
-    0,
-    0, 
+    .x = SCREEN_W / 2, 
+    .y = SCREEN_H / 4, 
+    .dx = 1, 
+    .dy = 1,
+    .ch = CHAR_BALL,
+    .color = WHITE, 
 };
 
 GameObject paddle_left = { 
-    MIN_X, 
-    SCREEN_H/2, 
-    0, 
-    0,
-    CHAR_PADDLE,
-    RED, 
+    .x = MIN_X,
+    .y = SCREEN_H/2,
+    .dx = 0,
+    .dy = 0,
+    .ch = CHAR_PADDLE,
+    .color = GREEN, 
 };
 
 GameObject paddle_right = { 
-    MAX_X, 
-    SCREEN_H/2, 
-    0, 
-    0,
-    CHAR_PADDLE,
-    GREEN, 
+    .x = MAX_X, 
+    .y = SCREEN_H/2, 
+    .dx = 0, 
+    .dy = 0,
+    .ch = CHAR_PADDLE,
+    .color = RED, 
 };
 
+void KeepObjectInBounds( GameObject * paddle )
+{
+    clamp(&paddle->y, MIN_Y, MAX_Y - 2);
+}
 
-void GetInput(int key)
+bool GetInput(int key)
 {
     switch (key) {
         case 'w': --paddle_left.y; break;
         case 's': ++paddle_left.y; break;
         case 'i': --paddle_right.y; break;
         case 'k': ++paddle_right.y; break;
-        case 't': {
-            int ch = (unsigned)getscreench(paddle_left.x, paddle_left.y);
-            printf("ch is: %d\n", ch);
-            break;
-        }
         default: break;
     }
+    
+    KeepObjectInBounds(&paddle_right);
+    KeepObjectInBounds(&paddle_left);
+    
+    return true;
 }
 
 // TODO: MoveBallToPreviousPosition
@@ -109,8 +115,6 @@ void UpdateGame()
     ball.x += ball.dx;
     ball.y += ball.dy;
     
-    // TODO: optomize / DRY:
-    
     // handle whether ball when off screen:
     
     if (( ball.x == MAX_X + 1 ) || (ball.x == MIN_X - 1))  { 
@@ -122,56 +126,36 @@ void UpdateGame()
     if (( ball.y == MAX_Y + 1 ) || (ball.y == MIN_Y - 1)) { // ball went off right side of screen
         BounceBallBack();
         ball.dy = -ball.dy; // bounce it back
+    
+    int hit_ch = getscreench(ball.x, ball.y);
+    if (hit_ch == CHAR_PADDLE) {
+        BounceBallBack();
+        play(NOTE_C, 4, 4, 120);
+        ball.dx = - ball.dx;
     }
-
-
-    // TODO: handle ball off screen top and left
+    }
 }
 
 void BallAndPaddleOverlap()
 {
      //bounce back if paddle hits ball
-    if (ball.y == paddle_left.y && ball.x == paddle_left.x)  {
-        //ball.x++;
-        //BounceBallBack();
+    if (ball.y && ball.x == 10)  {
+        ball.x++;
+        BounceBallBack();
         play(NOTE_C, 4, 4, 120);
-        //ball.dy = -ball.dy;
+        ball.dy = -ball.dy;
     }
 }
 
-void KeepObjectInBounds(int loc_x, int loc_y, int *x, int *y)
-{
-    clamp(x, loc_x, loc_y);
-    clamp(y, MIN_Y, MAX_Y);
-    clamp(y, MIN_Y - 2, MAX_Y - 2);
-}
 
-/*
- Alt approach
-L PADDLE: 10
- 10
- 11
- 12
- 
- for ( int y = paddle.y; y < paddle.y + PADDLE_H; y++ )
- {
-    gotoxy(paddle.x, y)
-    ...
- }
- 
-*/
-
-void DrawPaddle(int paddle_loc_x, int paddle_loc_y, int limit_x, int limit_y)
+void DrawPaddle(GameObject * paddle)
 {
-    gotoxy(paddle_loc_x, paddle_loc_y);
-    int count = 1;
-    for ( int y = paddle_left.y; y < paddle_left.y + PADDLE_SIZE; y++ ) {
-        putch(CHAR_PADDLE);
-        gotoxy(paddle_loc_x, paddle_loc_y + count);
-        count++;
+    textcolor(paddle->color);
+
+    for ( int y = paddle->y; y < paddle->y + PADDLE_SIZE; y++ ) {
+        gotoxy(paddle->x, y);
+        putch(paddle->ch);
         }
-
-    //KeepObjectInBounds(limit_x, limit_y, &paddle_x, &paddle_y);
 }
 
 void DrawGame()
@@ -181,8 +165,10 @@ void DrawGame()
     textcolor(WHITE);
     putch(7);
 
-    DrawPaddle(paddle_left.x, paddle_left.y, MIN_X, MAX_Y);
-    DrawPaddle(paddle_right.x, paddle_right.y, MAX_X, MAX_Y);
+    //left
+    DrawPaddle(&paddle_left);
+    //right
+    DrawPaddle(&paddle_right);
 }
 
 int main()
