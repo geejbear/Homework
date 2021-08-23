@@ -117,29 +117,32 @@ void UpdateGame()
     
     // handle whether ball when off screen:
     
-    if (( ball.x == MAX_X + 1 ) || (ball.x == MIN_X - 1))  { 
-        // ball went off right side of screen
+    // TEMP
+    // ball went off right or left side of screen?
+    if ( ball.x == MAX_X + 1 || ball.x == MIN_X - 1 )  {
         BounceBallBack();
         ball.dx = -ball.dx; // bounce it back
     }
     
-    if (( ball.y == MAX_Y + 1 ) || (ball.y == MIN_Y - 1)) { // ball went off right side of screen
+    // ball went off top or bottom side of screen?
+    if ( ball.y == MAX_Y + 1 || ball.y == MIN_Y - 1 ) {
         BounceBallBack();
         ball.dy = -ball.dy; // bounce it back
+    }
     
     int hit_ch = getscreench(ball.x, ball.y);
     if (hit_ch == CHAR_PADDLE) {
         BounceBallBack();
         play(NOTE_C, 4, 4, 120);
-        ball.dx = - ball.dx;
-    }
+        ball.dx = -ball.dx;
     }
 }
 
+// TODO: delete?
 void BallAndPaddleOverlap()
 {
      //bounce back if paddle hits ball
-    if (ball.y && ball.x == 10)  {
+    if (ball.y && ball.x == 10) { // ball.y == 10 && ball.x == 10 !!
         ball.x++;
         BounceBallBack();
         play(NOTE_C, 4, 4, 120);
@@ -155,7 +158,7 @@ void DrawPaddle(GameObject * paddle)
     for ( int y = paddle->y; y < paddle->y + PADDLE_SIZE; y++ ) {
         gotoxy(paddle->x, y);
         putch(paddle->ch);
-        }
+    }
 }
 
 void DrawGame()
@@ -165,9 +168,7 @@ void DrawGame()
     textcolor(WHITE);
     putch(7);
 
-    //left
     DrawPaddle(&paddle_left);
-    //right
     DrawPaddle(&paddle_right);
 }
 
@@ -185,11 +186,11 @@ int main()
             GetInput(getch());
         }
 
-        if (ticks % 10 == 0 ) {
+        if ( ticks % 10 == 0 ) {
             UpdateGame();
+            DrawGame();
         }
         
-        DrawGame();
         refresh();
         ticks++;
     }
