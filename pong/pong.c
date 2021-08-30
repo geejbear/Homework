@@ -6,6 +6,10 @@
 // > inline TODOs (do a search 'TODO')
 // - copy over play source code files
 // - think about is clamp a useful thing to have
+// - serve state, play state
+// - - serve: ball position is reset
+// - - serve: ball stays until key press to start round
+// - - play: ball goes off side: set to serve state, reset ball
 
 // NOTES
 // - ...
