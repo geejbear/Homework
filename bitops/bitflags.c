@@ -103,9 +103,10 @@ void Update(Entity entities[NUM_ENTITIES])
 
 typedef struct
 {
-    int  x;
-    int  y;
-    bool alive;
+    int x;
+    int y;
+    int score;
+    int lives;
     char flags; // much smaller!
 } Entity2;
 
