@@ -5,6 +5,10 @@
 // > inline TODOs (do a search 'TODO')
 // - copy over play source code files
 // - think about is clamp a useful thing to have
+// - serve state, play state
+// - - serve: ball position is reset
+// - - serve: ball stays until key press to start round
+// - - play: ball goes off side: set to serve state, reset ball
 
 // NOTES
 // - ...
@@ -115,15 +119,18 @@ void UpdateGame()
     
     // handle whether ball when off screen:
     
-    if (( ball.x == MAX_X + 1 ) || (ball.x == MIN_X - 1))  { 
-        // ball went off right side of screen
+    // TEMP
+    // ball went off right or left side of screen?
+    if ( ball.x == MAX_X + 1 || ball.x == MIN_X - 1 )  {
         BounceBallBack();
         ball.dx = -ball.dx; // bounce it back
     }
     
-    if (( ball.y == MAX_Y + 1 ) || (ball.y == MIN_Y - 1)) { // ball went off right side of screen
+    // ball went off top or bottom side of screen?
+    if ( ball.y == MAX_Y + 1 || ball.y == MIN_Y - 1 ) {
         BounceBallBack();
         ball.dy = -ball.dy; // bounce it back
+    }
     
     }
 
@@ -134,6 +141,20 @@ void UpdateGame()
         ball.dx = - ball.dx;
     }    
     
+        ball.dx = -ball.dx;
+    }
+}
+
+// TODO: delete?
+void BallAndPaddleOverlap()
+{
+     //bounce back if paddle hits ball
+    if (ball.y && ball.x == 10) { // ball.y == 10 && ball.x == 10 !!
+        ball.x++;
+        BounceBallBack();
+        play(NOTE_C, 4, 4, 120);
+        ball.dy = -ball.dy;
+    }
 }
 
 void DrawPaddle(GameObject * paddle)
@@ -143,7 +164,7 @@ void DrawPaddle(GameObject * paddle)
     for ( int y = paddle->y; y < paddle->y + PADDLE_SIZE; y++ ) {
         gotoxy(paddle->x, y);
         putch(paddle->ch);
-        }
+    }
 }
 
 void DrawGame()
@@ -156,6 +177,7 @@ void DrawGame()
     //left paddle
     DrawPaddle(&paddle_left);
     //right paddle
+    DrawPaddle(&paddle_left);
     DrawPaddle(&paddle_right);
 }
 
@@ -173,11 +195,11 @@ int main()
             GetInput(getch());
         }
 
-        if (ticks % 10 == 0 ) {
+        if ( ticks % 10 == 0 ) {
             UpdateGame();
+            DrawGame();
         }
         
-        DrawGame();
         refresh();
         ticks++;
     }

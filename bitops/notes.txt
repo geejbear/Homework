@@ -1,0 +1,57 @@
+NOT OPERATOR (~a)
+~1010 = 0101
+
+AND OPERATOR (a & b)
+  0011
+& 0010
+= 0010
+
+-> any 0 involved, makes whole thing 0
+
+
+OR OPERATOR (a | b)
+  0011
+| 0010
+= 0011
+
+-> any 1 that's involved, stays 1
+
+
+XOR OPERATOR (^)
+  0011
+^ 0010
+= 0001
+
+-> zero if digits are the same
+-> int flag = 1;
+
+
+SHIFT LEFT OPERATOR (<<)
+0001 << 1 = 0010 (2)
+0001 << 2 = 0100 (4)
+
+
+SHIFT RIGHT OPERATOR (>>)
+ditto
+0001 >> 1 = 0000
+
+--------------------------------------------------------------------------------
+Get and Set individual values within an integer
+--------------------------------------------------------------------------------
+
+32-bit color BIT LAYOUT:
+        RRRRRRRR GGGGGGGG BBBBBBBB AAAAAAAA
+
+EXAMPLE COLOR
+uint32_t color = 0xFF00FA77; // purple with half transparency
+
+uint8_t alpha = color & 0x000000FF;
+    11111111 00000000 11111010 01110111 (color, 0xFF00FA77)
+&   00000000 00000000 00000000 11111111 (bit mask, 0x000000FF)
+    00000000 00000000 00000000 01110111 (alpha component)
+
+uint8_t blue = color & 0x0000FF00;
+    11111111 00000000 11111010 01110111 (color, 0xFF00FA77)
+&   00000000 00000000 00000000 11111111 (bit mask, 0x0000FF00)
+    00000000 00000000 11111010 00000000 (R, G, and A components cleared)
+>>8 00000000 00000000 00000000 11111010 (blue component)
