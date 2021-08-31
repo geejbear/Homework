@@ -1,8 +1,7 @@
-//
 // TODO: heading
 //
 
-// TODOs
+//:i TODOs
 // > inline TODOs (do a search 'TODO')
 // - copy over play source code files
 // - think about is clamp a useful thing to have
@@ -17,8 +16,7 @@
 // <> includes: where the compiler looks for headers (-I)
 #include <play.h>
 #include <utility.h>
-#include "ascii.h"
-
+#include <ascii.h>
 #include <dos.h>
 #include <conio.h>
 
@@ -127,26 +125,16 @@ void UpdateGame()
         BounceBallBack();
         ball.dy = -ball.dy; // bounce it back
     
+    }
+
     int hit_ch = getscreench(ball.x, ball.y);
     if (hit_ch == CHAR_PADDLE) {
         BounceBallBack();
         play(NOTE_C, 4, 4, 120);
         ball.dx = - ball.dx;
-    }
-    }
+    }    
+    
 }
-
-void BallAndPaddleOverlap()
-{
-     //bounce back if paddle hits ball
-    if (ball.y && ball.x == 10)  {
-        ball.x++;
-        BounceBallBack();
-        play(NOTE_C, 4, 4, 120);
-        ball.dy = -ball.dy;
-    }
-}
-
 
 void DrawPaddle(GameObject * paddle)
 {
@@ -165,9 +153,9 @@ void DrawGame()
     textcolor(WHITE);
     putch(7);
 
-    //left
+    //left paddle
     DrawPaddle(&paddle_left);
-    //right
+    //right paddle
     DrawPaddle(&paddle_right);
 }
 
