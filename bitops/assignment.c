@@ -70,6 +70,9 @@ int main()
     printf("green component: 0x%02X (%d)\n", green, green);
     
     // 3. find the red component:
+
+
+    color = 0x65FB8C85;
 	mask = 0xFF000000;
     uint8_t red = (color &= mask) >>24;
     
