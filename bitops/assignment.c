@@ -49,11 +49,11 @@ int main()
 	// 01100101 11111011 100001100 100000101
 	
 	//green:
-	//  01100101 11111011 100001100 100000101
-	//& 00000000 11111111 000000000 000000000
+	//     01100101 11111011 100001100 100000101
+	//   & 00000000 11111111 000000000 000000000
 	//  ======================================
-	//  00000000 11111011 000000000 000000000
-
+	//     00000000 11111011 000000000 00000000
+    //>>16 00000000 00000000 000000000 11111011
 	//red
 	//  01100101 11111011 100001100 100000101
 	//& 11111111 00000000 000000000 000000000
@@ -61,14 +61,17 @@ int main()
 	//  01100101 00000000 000000000 000000000
 
 // 1. find the green component:
-    uint8_t green = 0xFB;
+
+	uint32_t mask = 0x00FF0000;
+    uint8_t green = (color &= mask) >>16;
     
     // 2. non-related knowledge: what does the specificer %02X do?
 	//A: It prints the hexadecimal and diplays it in two digits.
     printf("green component: 0x%02X (%d)\n", green, green);
     
     // 3. find the red component:
-    uint8_t red = 0x65;
+	mask = 0xFF000000;
+    uint8_t red = (color &= mask) >>24;
     
     printf("red component: 0x%02X (%d)\n", red, red);
     
