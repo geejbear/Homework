@@ -3,12 +3,16 @@
 #include <stdlib.h>
 #include <time.h>
 
-#if 0 // TEMP
+#if 1 // TEMP
 typedef struct
 {
     // 4. Write a struct that stores r, g, b, a
     // values in individual members.
     // Check your answer with Tom before moving on.
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+    uint8_t alpha;
 } Color;
 #endif
 
