@@ -154,12 +154,12 @@ int main()
                     if (key == 'w') {
                         choice(RED, CH_WINE, 
                                 LIGHTGRAY);
-                        state = STATE_END;
-                   
-                    } else if (key == 'b') {
-                        choice(YELLOW, CH_BEER, 
-                                LIGHTGRAY);
-                        state = STATE_END;
+								state = STATE_END;
+						   
+							} else if (key == 'b') {
+								choice(YELLOW, CH_BEER, 
+										LIGHTGRAY);
+								state = STATE_END;
                     }    
                     break;
                 case STATE_END:

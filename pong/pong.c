@@ -14,7 +14,6 @@
 // - ...
 
 // BUGS
-// - paddle blinks when it reaches clamp limit
 
 // "" includes: relative to current path
 // <> includes: where the compiler looks for headers (-I)
@@ -38,11 +37,17 @@
 #define MIN_Y           1
 #define CHAR_PADDLE     10
 #define PADDLE_SIZE     3
+#define PADDLE_SIZE     3
+#define SERVE_COUNTER   3
 #define CHAR_BALL       7
 
-
-
 // game data
+
+enum
+{
+    STATE_SERVE = 1,
+    STATE_RUMBLE,
+};
 
 typedef struct
 {
@@ -52,6 +57,7 @@ typedef struct
     int dy;
     char ch;
     int color;
+    bool serve;
 } GameObject;
 
 
@@ -63,6 +69,7 @@ GameObject ball = {
     .dy = 1,
     .ch = CHAR_BALL,
     .color = WHITE, 
+    .serve = false,
 };
 
 GameObject paddle_left = { 
@@ -72,6 +79,7 @@ GameObject paddle_left = {
     .dy = 0,
     .ch = CHAR_PADDLE,
     .color = GREEN, 
+    .serve = false,
 };
 
 GameObject paddle_right = { 
@@ -81,6 +89,7 @@ GameObject paddle_right = {
     .dy = 0,
     .ch = CHAR_PADDLE,
     .color = RED, 
+    .serve = false,
 };
 
 void KeepObjectInBounds( GameObject * paddle )
@@ -105,7 +114,7 @@ bool GetInput(int key)
 }
 
 // TODO: MoveBallToPreviousPosition
-void BounceBallBack() 
+void MoveBallToPreviousPosition() 
 {
     ball.x -= ball.dx;  // put it back
     ball.y -= ball.dy;  // put it back
@@ -113,48 +122,38 @@ void BounceBallBack()
 
 void UpdateGame()
 {
-    // update the ball's position
-    ball.x += ball.dx;
-    ball.y += ball.dy;
+    ball.serve = true;
+    
+    
+    if (ball.serve == false) {
+        ball.x += ball.dx;        
+        ball.y += ball.dy;
+    }
     
     // handle whether ball when off screen:
     
     // TEMP
     // ball went off right or left side of screen?
     if ( ball.x == MAX_X + 1 || ball.x == MIN_X - 1 )  {
-        BounceBallBack();
-        ball.dx = -ball.dx; // bounce it back
+        ball.serve = true;
+        ball.x = SCREEN_W / 2; 
+        ball.y = SCREEN_H / 4;
+        ball.serve = false;   
     }
     
     // ball went off top or bottom side of screen?
     if ( ball.y == MAX_Y + 1 || ball.y == MIN_Y - 1 ) {
-        BounceBallBack();
-        ball.dy = -ball.dy; // bounce it back
-    }
-    
+        MoveBallToPreviousPosition();
+        ball.dy = -ball.dy;
     }
 
     int hit_ch = getscreench(ball.x, ball.y);
     if (hit_ch == CHAR_PADDLE) {
-        BounceBallBack();
+        MoveBallToPreviousPosition();
         play(NOTE_C, 4, 4, 120);
         ball.dx = - ball.dx;
     }    
-    
-        ball.dx = -ball.dx;
-    }
-}
 
-// TODO: delete?
-void BallAndPaddleOverlap()
-{
-     //bounce back if paddle hits ball
-    if (ball.y && ball.x == 10) { // ball.y == 10 && ball.x == 10 !!
-        ball.x++;
-        BounceBallBack();
-        play(NOTE_C, 4, 4, 120);
-        ball.dy = -ball.dy;
-    }
 }
 
 void DrawPaddle(GameObject * paddle)
@@ -174,9 +173,7 @@ void DrawGame()
     textcolor(WHITE);
     putch(7);
 
-    //left paddle
-    DrawPaddle(&paddle_left);
-    //right paddle
+
     DrawPaddle(&paddle_left);
     DrawPaddle(&paddle_right);
 }

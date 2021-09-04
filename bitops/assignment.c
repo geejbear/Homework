@@ -72,10 +72,8 @@ int main()
     // 2. non-related knowledge: what does the specificer %02X do?
 	//A: It prints the hexadecimal and diplays it in two digits.
     printf("green component: 0x%02X (%d)\n", green, green);
-    
+
     // 3. find the red component:
-
-
     color = 0x65FB8C85;
 	mask = 0xFF000000;
     uint8_t red = (color &= mask) >>24;
