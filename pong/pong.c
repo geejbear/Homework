@@ -28,8 +28,8 @@
 #include <stdio.h>
 
 
-#define SCREEN_W        16
-#define SCREEN_H        16
+#define SCREEN_W        20
+#define SCREEN_H        12
 // note: minimum x and y is 1 in turbo C
 #define MAX_X           SCREEN_W
 #define MAX_Y           SCREEN_H
@@ -56,8 +56,8 @@ typedef struct
     int dx;
     int dy;
     char ch;
-    int color;
-    bool serve;
+    int fc;
+    int bc;
 } GameObject;
 
 
@@ -68,8 +68,8 @@ GameObject ball = {
     .dx = 1, 
     .dy = 1,
     .ch = CHAR_BALL,
-    .color = WHITE, 
-    .serve = false,
+    .bc = BLUE,
+    .fc = WHITE, 
 };
 
 GameObject paddle_left = { 
@@ -78,8 +78,8 @@ GameObject paddle_left = {
     .dx = 0,
     .dy = 0,
     .ch = CHAR_PADDLE,
-    .color = GREEN, 
-    .serve = false,
+    .fc = GREEN, 
+    .bc = BLUE,
 };
 
 GameObject paddle_right = { 
@@ -88,8 +88,8 @@ GameObject paddle_right = {
     .dx = 0, 
     .dy = 0,
     .ch = CHAR_PADDLE,
-    .color = RED, 
-    .serve = false,
+    .fc = RED, 
+    .bc = BLUE,
 };
 
 void KeepObjectInBounds( GameObject * paddle )
@@ -104,6 +104,7 @@ bool GetInput(int key)
         case 's': ++paddle_left.y; break;
         case 'i': --paddle_right.y; break;
         case 'k': ++paddle_right.y; break;
+        
         default: break;
     }
     
@@ -122,29 +123,34 @@ void MoveBallToPreviousPosition()
 
 void UpdateGame()
 {
-    ball.serve = true;
+    int state = STATE_SERVE;
+
+    switch (state) {
+        
+        case STATE_RUMBLE:
+            ball.x += ball.dx;        
+            ball.y += ball.dy;
     
-    
-    if (ball.serve == false) {
-        ball.x += ball.dx;        
-        ball.y += ball.dy;
+            if ( ball.x == MAX_X + 1 || ball.x == MIN_X - 1 )  {
+                state = STATE_SERVE;
+                ball.x = SCREEN_W / 2; //could be in the other state already...
+                ball.y = SCREEN_H / 4;
+            }
+            break;
+        
+        case STATE_SERVE:
+            
+            if ( !STATE_SERVE ) { //TODO
+                state = STATE_RUMBLE;
+            }
+            break;    
+
     }
     
-    // handle whether ball when off screen:
-    
-    // TEMP
-    // ball went off right or left side of screen?
-    if ( ball.x == MAX_X + 1 || ball.x == MIN_X - 1 )  {
-        ball.serve = true;
-        ball.x = SCREEN_W / 2; 
-        ball.y = SCREEN_H / 4;
-        ball.serve = false;   
-    }
-    
-    // ball went off top or bottom side of screen?
     if ( ball.y == MAX_Y + 1 || ball.y == MIN_Y - 1 ) {
         MoveBallToPreviousPosition();
         ball.dy = -ball.dy;
+    
     }
 
     int hit_ch = getscreench(ball.x, ball.y);
@@ -153,12 +159,23 @@ void UpdateGame()
         play(NOTE_C, 4, 4, 120);
         ball.dx = - ball.dx;
     }    
+    
+    
+    
+    
+    // handle whether ball when off screen:
+    
+    // TEMP
+    // ball went off right or left side of screen?
+    
+    // ball went off top or bottom side of screen?
 
 }
 
 void DrawPaddle(GameObject * paddle)
 {
-    textcolor(paddle->color);
+    textcolor(paddle->fc);
+    textbackground(paddle->bc);
 
     for ( int y = paddle->y; y < paddle->y + PADDLE_SIZE; y++ ) {
         gotoxy(paddle->x, y);
@@ -171,6 +188,7 @@ void DrawGame()
     clrscr();
     gotoxy(ball.x, ball.y);
     textcolor(WHITE);
+    textbackground(BLACK);
     putch(7);
 
 
