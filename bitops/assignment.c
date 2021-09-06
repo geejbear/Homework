@@ -27,15 +27,26 @@ void PrintColor32(uint32_t color32)
 #endif
 
 
-#if 0 // TEMP
+#if 1 // TEMP
 Color ColorFrom32(uint32_t color)
 {
     Color result;
-    
-    // 5. complete this function, which converts a 32-bit color value
+	
+	uint32_t mask = 0xFF000000;
+    result.red = (color &= mask) >>24;
+
+	mask = 0x00FF0000;
+	result.green = (color &= mask) >>16;
+
+	mask = 0x0000FF00;
+    result.blue = (color &= mask) >>8;
+	
+	mask = 0x000000FF;
+    result.alpha = (color &= mask);
+	// 5. complete this function, which converts a 32-bit color value
     // to a Color struct.
     
-    return color;
+    return result;
 }
 #endif
 
@@ -79,6 +90,6 @@ int main()
     uint8_t red = (color &= mask) >>24;
     
     printf("red component: 0x%02X (%d)\n", red, red);
-    
+	
     return 0;
 }
