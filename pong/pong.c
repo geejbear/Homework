@@ -49,6 +49,8 @@ enum
     STATE_RUMBLE,
 };
 
+// TODO: bool serve; simpler?
+
 typedef struct
 {
     int x;
@@ -58,12 +60,12 @@ typedef struct
     char ch;
     int fc;
     int bc;
-    bool active;
+    bool active; // TODO: remove, use dx / dy instead
 } GameObject;
 
 
 // initialize a struct all at once
-GameObject ball = { 
+GameObject ball = {
     .x = SCREEN_W / 2, 
     .y = SCREEN_H / 4, 
     .dx = 1, 
@@ -128,8 +130,18 @@ void MoveBallToPreviousPosition()
 
 void UpdateGame()
 {
-    int state = STATE_SERVE;
+    // static function variables persist between function calls
+    static int state = STATE_SERVE; // OK if state only needed in UpdateGame
 
+#if 0 // this instead?
+    bool server = true;
+    if ( server ) {
+        
+    } else {
+        
+    }
+#endif
+    
     switch (state) {
         
         case STATE_SERVE:
@@ -155,9 +167,9 @@ void UpdateGame()
                 state = STATE_SERVE;
             }
             break;
-        
-
-    }
+        default:
+            break;
+    }    
     
     if ( ball.y == MAX_Y + 1 || ball.y == MIN_Y - 1 ) {
         MoveBallToPreviousPosition();
@@ -171,7 +183,6 @@ void UpdateGame()
         play(NOTE_C, 4, 4, 120); //TODO make shorter sound
         ball.dx = - ball.dx;
     }    
-    
     
     
     
@@ -215,6 +226,7 @@ int main()
     setcursor(0);
     setscreensize(SCREEN_W, SCREEN_H);
     initdos();
+    
     
     int ticks = 0;
     while (1) {

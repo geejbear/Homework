@@ -39,6 +39,7 @@ typedef struct
 } EntityOptions;
 
 // TODO: how many bytes is an EntityOptions struct?
+// answer: 7 bytes
 // the size of 'bool' might vary from computer to computer, so you should use
 // code to find its size.
 
@@ -84,16 +85,16 @@ void Update(Entity entities[NUM_ENTITIES])
 // with bit flags, one only needs 1 bit, rather than 1 byte to store a boolean
 // value, but accessing each value becomes more involved.
 
+// bit masks
+
 #define ENTITY_FLAGS_NONE       0x00 // 00000000
 #define ENTITY_FLAGS_SOLID      0x01 // 00000001
-#define ENTITY_FLAGS_PASSIVE    0x02 // TODO: comment hex value in binary
-#define ENTITY_FLAGS_FLIES      0x04 // ?
-#define ENTITY_FLAGS_RESPAWNS   0x08 // ?
-#define ENTITY_FLAGS_EASY       0x10 // ?
-#define ENTITY_FLAGS_MEDIUM     0x20 // ?
-#define ENTITY_FLAGS_HARD       0x40 // ?
-
-
+#define ENTITY_FLAGS_PASSIVE    0x02 // 00000010
+#define ENTITY_FLAGS_FLIES      0x04 // 00000100
+#define ENTITY_FLAGS_RESPAWNS   0x08 // 00001000
+#define ENTITY_FLAGS_EASY       0x10 // 00010000
+#define ENTITY_FLAGS_MEDIUM     0x20 // 00100000
+#define ENTITY_FLAGS_HARD       0x40 // 01000000
 
 
 // with only 7 options, and each option now only 1 bit, we can fit all of an
@@ -107,7 +108,7 @@ typedef struct
     int y;
     int score;
     int lives;
-    char flags; // much smaller!
+    EntityFlags flags; // much smaller!
 } Entity2;
 
 // TODO: how many bytes is an Entity2 struct?
@@ -125,26 +126,26 @@ typedef struct
 
 int main()
 {
-    printf("do problem 1. here\n");
+    printf("size of EntityOptions: %zu bytes\n", sizeof(EntityOptions));
+    printf("size of Entity: %zu bytes\n", sizeof(Entity));
+    printf("size of Entity2: %zu bytes\n", sizeof(Entity2));
     
     srand((unsigned)time(NULL));
     
     Entity2 monster; // notice it's an Entity2, not Entity!
     monster.flags = rand(); // give it some random options
     
-    
-    // TODO: check if moster has 'passive' option
-#if 0 // remove when ready to do this problem
-    if ( ? ) {
+    // TODO: check if monster has 'passive' option
+
+    if ( monster.flags & ENTITY_FLAGS_PASSIVE ) {
         puts("moster is passive");
     }
-#endif
 
     
-    // TODO: check if moster has 'respawns' option
+    // TODO: check if monster has 'respawns' option
 #if 0 // remove when ready to do this problem
     if ( ? ) {
-        puts("monsert will respawn");
+        puts("monster will respawn");
     }
 #endif
     
@@ -169,7 +170,7 @@ typedef enum
     ENTITY_FLAGS2_EASY      = 0x10,
     ENTITY_FLAGS2_MEDIUM    = 0x20,
     ENTITY_FLAGS2_HARD      = 0x40
-} EntityFlags2;
+} EntityFlags;
 
 // here we can declare a variable of type 'EntityFlags2', however the size of
 // an enum value is usually the same size as an int by default, and the space
@@ -181,8 +182,7 @@ typedef enum
 // solution two: use #define'd values and just typedef the size of int you to
 // stores the flags.
 
-typedef char EntityFlags3;
-
+typedef char EntityFlags2;
 
 
 

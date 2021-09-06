@@ -6,9 +6,6 @@
 #if 1 // TEMP
 typedef struct
 {
-    // 4. Write a struct that stores r, g, b, a
-    // values in individual members.
-    // Check your answer with Tom before moving on.
     uint8_t red;
     uint8_t green;
     uint8_t blue;
@@ -22,43 +19,38 @@ void PrintColor32(uint32_t color32)
 {
     // 6. additional practice: complete this function
     
+    
     printf("0x%08X (%d, %d, %d, %d)\n", ?);
 }
 #endif
 
 
-#if 1 // TEMP
 Color ColorFrom32(uint32_t color)
 {
     Color result;
 	
 	uint32_t mask = 0xFF000000;
-    result.red = (color &= mask) >>24;
+    result.red = (color & mask) >> 24;
 
 	mask = 0x00FF0000;
-	result.green = (color &= mask) >>16;
+	result.green = (color & mask) >> 16;
 
 	mask = 0x0000FF00;
-    result.blue = (color &= mask) >>8;
+    result.blue = (color & mask) >> 8;
 	
 	mask = 0x000000FF;
-    result.alpha = (color &= mask);
-	// 5. complete this function, which converts a 32-bit color value
-    // to a Color struct.
-    
+    result.alpha = color & mask;
+        
     return result;
 }
-#endif
 
 
 int main()
 {
-    //srand((unsigned)time(NULL));
-    
-    //uint32_t color = rand();
     uint32_t color = 0x65FB8C85;
-    //printf("random RGBA color: 0x%08X\n", color); // to check 1. and 3.
-	printf("Random generated color: 0x%08X\n", color);
+    
+	printf("Color: 0x%08X\n", color);
+    
 	// random generated number: 
 	// 0x65FB8C85
 	// 01100101 11111011 100001100 100000101
@@ -78,16 +70,15 @@ int main()
 // 1. find the green component:
 
 	uint32_t mask = 0x00FF0000;
-    uint8_t green = (color &= mask) >>16;
+    uint8_t green = (color & mask) >> 16;
     
     // 2. non-related knowledge: what does the specificer %02X do?
 	//A: It prints the hexadecimal and diplays it in two digits.
     printf("green component: 0x%02X (%d)\n", green, green);
 
     // 3. find the red component:
-    color = 0x65FB8C85;
 	mask = 0xFF000000;
-    uint8_t red = (color &= mask) >>24;
+    uint8_t red = (color & mask) >> 24;
     
     printf("red component: 0x%02X (%d)\n", red, red);
 	
