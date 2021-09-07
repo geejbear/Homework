@@ -43,6 +43,8 @@
 
 // game data
 
+bool serve = true;
+
 
 typedef struct
 {
@@ -99,13 +101,16 @@ bool GetInput(int key)
         case 's': ++paddle_left.y; break;
         case 'i': --paddle_right.y; break;
         case 'k': ++paddle_right.y; break;
-        
+        case 'b': serve = false; break;
         default: break;
     }
+
     
     KeepObjectInBounds(&paddle_right);
     KeepObjectInBounds(&paddle_left);
     
+ 
+
     return true;
 }
 
@@ -119,24 +124,20 @@ void MoveBallToPreviousPosition()
 void UpdateGame()
 {
 
-    bool server = false;
-    int key = getch();
     
-    if ( server == true || ball.x == MAX_X + 1 || ball.x == MIN_X - 1 ) {
+    if ( serve || ball.x == MAX_X + 1 || ball.x == MIN_X - 1 ) {
         ball.x = SCREEN_W / 2;
         ball.y = SCREEN_H / 4;
         ball.dx = 0;
         ball.dy = 0;    
-    } else  {
-        server = false;
+    } else if (!serve)  {
         ball.x += ball.dx;        
         ball.y += ball.dy;    
-    }         
-
+    } 
+    
     if ( ball.y == MAX_Y + 1 || ball.y == MIN_Y - 1 ) {
         MoveBallToPreviousPosition();
         ball.dy = -ball.dy;
-    
     }
 
     int hit_ch = getscreench(ball.x, ball.y);
