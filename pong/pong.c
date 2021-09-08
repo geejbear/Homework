@@ -97,44 +97,54 @@ void KeepObjectInBounds( GameObject * paddle )
 bool GetInput(int key)
 {
     switch (key) {
-        case 'w': --paddle_left.y; break;
-        case 's': ++paddle_left.y; break;
-        case 'i': --paddle_right.y; break;
-        case 'k': ++paddle_right.y; break;
-        case 'b': serve = false; break;
+        case 'w': 
+            --paddle_left.y; 
+            if (serve) {
+                serve = false;
+            }
+            break;
+        case 's': 
+            ++paddle_left.y; 
+            break;
+        case 'i': 
+            --paddle_right.y; 
+            break;
+        case 'k': 
+            ++paddle_right.y; 
+            break;
         default: break;
     }
-
-    
+ 
     KeepObjectInBounds(&paddle_right);
     KeepObjectInBounds(&paddle_left);
     
- 
-
-    return true;
+     return true;
 }
 
 // TODO: MoveBallToPreviousPosition
 void MoveBallToPreviousPosition() 
 {
-    ball.x -= ball.dx;  // put it back
-    ball.y -= ball.dy;  // put it back
 }
 
 void UpdateGame()
-{
-
+{ 
     
-    if ( serve || ball.x == MAX_X + 1 || ball.x == MIN_X - 1 ) {
+    if (serve) {
         ball.x = SCREEN_W / 2;
         ball.y = SCREEN_H / 4;
         ball.dx = 0;
         ball.dy = 0;    
-    } else if (!serve)  {
-        ball.x += ball.dx;        
-        ball.y += ball.dy;    
-    } 
+        
+    } else  {
+        ball.x -= ball.dx;  // put it back
+        ball.y -= ball.dy;  // put it back
+          
+    }
     
+    if (ball.x == MAX_X + 1 || ball.x == MIN_X - 1) {
+        serve = true;
+    }
+
     if ( ball.y == MAX_Y + 1 || ball.y == MIN_Y - 1 ) {
         MoveBallToPreviousPosition();
         ball.dy = -ball.dy;
