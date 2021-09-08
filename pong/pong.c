@@ -136,8 +136,8 @@ void UpdateGame()
         ball.dy = 0;    
         
     } else  {
-        ball.x -= ball.dx;  // put it back
-        ball.y -= ball.dy;  // put it back
+        ball.x += ball.dx;  // put it back
+        ball.y += ball.dy;  // put it back
           
     }
     
