@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 
 #define SCREEN_W        24
@@ -22,8 +23,9 @@
 
 #define PADDLE_SIZE     3
 
+#define INITIAL_PADDLE_Y (SCREEN_H / 2 - 1)
 #define INITIAL_BALL_X  (SCREEN_W * 0.5)
-#define INITIAL_BALL_Y  (SCREEN_H * 0.75)
+#define INITIAL_BALL_Y  (SCREEN_H * 0.5)
 
 #define GAME_SPEED      10
 
@@ -49,7 +51,7 @@ GameObject ball = {
 
 GameObject paddle_left = {
     .x = MIN_X,
-    .y = SCREEN_H/2,
+    .y = INITIAL_PADDLE_Y,
     .dx = 0,
     .dy = 0,
     .ch = CHAR_PADDLE,
@@ -59,7 +61,7 @@ GameObject paddle_left = {
 
 GameObject paddle_right = {
     .x = MAX_X,
-    .y = SCREEN_H/2,
+    .y = INITIAL_PADDLE_Y,
     .dx = 0,
     .dy = 0,
     .ch = CHAR_PADDLE,
@@ -71,7 +73,7 @@ GameObject paddle_right = {
 bool serve = true;
 
 
-void SetServeState()
+void EnterServeState()
 {
     serve = true;
     
@@ -82,11 +84,11 @@ void SetServeState()
 }
 
 
-void SetPlayState()
+void EnterPlayState()
 {
     serve = false;
     
-    ball.dx = arc4random_uniform(1000) < 500 ? 1 : -1;
+    ball.dx = rand() % 1000 < 500 ? 1 : -1;
     ball.dy = -1;
 }
 
@@ -97,17 +99,26 @@ void KeepPaddleInBounds(GameObject * paddle)
 }
 
 
-bool GetInput(int key)
+bool ProcessInput(int key)
 {
     switch (key) {
-        case 27: return false;
-        case 'w': --paddle_left.y; break;
-        case 's': ++paddle_left.y; break;
-        case 'i': --paddle_right.y; break;
-        case 'k': ++paddle_right.y; break;
+        case 27: // escape key
+            return false;
+        case 'w':
+            --paddle_left.y;
+            break;
+        case 's':
+            ++paddle_left.y;
+            break;
+        case 'i':
+            --paddle_right.y;
+            break;
+        case 'k':
+            ++paddle_right.y;
+            break;
         case ' ':
             if ( serve ) {
-                SetPlayState();
+                EnterPlayState();
             }
             break;
         default: break;
@@ -130,6 +141,13 @@ void MoveBallToPreviousPosition()
 }
 
 
+void ScorePointSound()
+{
+    sound(735, 50);
+    sound(411, 50);
+}
+
+
 void UpdateGame()
 {
     // update the ball's position
@@ -139,24 +157,29 @@ void UpdateGame()
     
     // handle whether ball when off screen:
     
-    if ( ball.x == MAX_X + 1 ) {
+    // TODO: DRY
+    if ( ball.x == MAX_X + 1 ) { // right side
         ++paddle_left.score;
-        SetServeState();
-    }
-        
-    if ( ball.x == MIN_X - 1 )  {
+        ScorePointSound();
+        EnterServeState();
+    } else if ( ball.x == MIN_X - 1 )  { // left side
         ++paddle_right.score;
-        SetServeState();
+        ScorePointSound();
+        EnterServeState();
     }
     
-    // ball went off bottom or top of screen
+    // ball went off bottom or top of screen:
+    
     if ( ball.y == MAX_Y + 1 || ball.y == MIN_Y - 1) {
         MoveBallToPreviousPosition(); // correct its position
         ball.dy = -ball.dy; // bounce
+        sound(500, 50);
     }
     
-    // check for ball overlap with paddle
+    // check for ball overlap with paddle:
+    
     int hit_ch = getscreench(ball.x, ball.y); // check what the ball's on
+    
     if ( hit_ch == CHAR_PADDLE ) {
         MoveBallToPreviousPosition(); // move it back out of the paddle
         sound(1000, 50);
@@ -194,11 +217,27 @@ void DrawGame()
     
     textcolor(WHITE);
     
+    // scores:
+    
+    // TODO: DRY
     gotoxy(SCREEN_W * 0.25, 1);
     cprintf("%d", paddle_left.score);
     
     gotoxy(SCREEN_W * 0.75, 1);
     cprintf("%d", paddle_right.score);
+    
+    // controls:
+    
+    if ( serve ) {
+        gotoxy(MIN_X + 1, MAX_Y / 2);
+        cprintf("W/S");
+        gotoxy(MAX_X - 3, MAX_Y / 2);
+        cprintf("I/K");
+        
+        const char * string = "SPACE to Serve";
+        gotoxy((MAX_X - strlen(string)) / 2, MAX_Y);
+        cprintf(string);
+    }
 }
 
 
@@ -209,14 +248,15 @@ int main()
     setcursor(0);
     setscreensize(SCREEN_W, SCREEN_H);
     initdos();
+    randomize(); // libtc equivalent of srand((unsigned)time(NULL))
     
-    SetServeState();
+    EnterServeState();
     
     bool running = true;
     int ticks = 0;
     while ( running ) {
         if ( kbhit() ) {
-            running = GetInput(getch());
+            running = ProcessInput(getch());
         }
 
         if (ticks % GAME_SPEED == 0 ) {
