@@ -28,8 +28,8 @@
 #include <stdio.h>
 
 
-#define SCREEN_W        20
-#define SCREEN_H        12
+#define SCREEN_W        22
+#define SCREEN_H        14
 // note: minimum x and y is 1 in turbo C
 #define MAX_X           SCREEN_W
 #define MAX_Y           SCREEN_H
@@ -99,9 +99,6 @@ bool GetInput(int key)
     switch (key) {
         case 'w': 
             --paddle_left.y; 
-            if (serve) {
-                serve = false;
-            }
             break;
         case 's': 
             ++paddle_left.y; 
@@ -112,6 +109,11 @@ bool GetInput(int key)
         case 'k': 
             ++paddle_right.y; 
             break;
+        case ' ':
+            if ( serve ) {
+                serve = false;
+            }
+            
         default: break;
     }
  
@@ -124,37 +126,37 @@ bool GetInput(int key)
 // TODO: MoveBallToPreviousPosition
 void MoveBallToPreviousPosition() 
 {
+    ball.x -= ball.dx;
+    ball.y -= ball.dy;
 }
 
 void UpdateGame()
 { 
+    ball.x += ball.dx;  // put it back
+    ball.y += ball.dy;  // put it back      
     
-    if (serve) {
+    //
+    if (ball.x == MAX_X + 1 || ball.x == MIN_X - 1) {
+        
+        serve = true;
+        
         ball.x = SCREEN_W / 2;
         ball.y = SCREEN_H / 4;
         ball.dx = 0;
         ball.dy = 0;    
-        
-    } else  {
-        ball.x += ball.dx;  // put it back
-        ball.y += ball.dy;  // put it back
-          
     }
-    
-    if (ball.x == MAX_X + 1 || ball.x == MIN_X - 1) {
-        serve = true;
-    }
-
-    if ( ball.y == MAX_Y + 1 || ball.y == MIN_Y - 1 ) {
+    // ball bounces from bottom/top margins
+    if ( ball.y == MAX_Y + 1 || ball.y ==  MIN_Y - 1 ) {
         MoveBallToPreviousPosition();
         ball.dy = -ball.dy;
     }
 
+    // ball bounce from paddle     
     int hit_ch = getscreench(ball.x, ball.y);
     if (hit_ch == CHAR_PADDLE) {
         MoveBallToPreviousPosition();
-        play(NOTE_C, 4, 4, 120); //TODO make shorter sound
-        ball.dx = - ball.dx;
+        play(NOTE_C, 4, 8, 120); //TODO make shorter sound
+        ball.dx = -ball.dx;
     }    
 
 }
@@ -199,7 +201,9 @@ int main()
         }
 
         if ( ticks % 10 == 0 ) {
-            UpdateGame();
+            if (!serve) {
+                UpdateGame();
+            }
             DrawGame();
         }
         
