@@ -43,13 +43,8 @@
 
 // game data
 
-enum
-{
-    STATE_SERVE = 1,
-    STATE_RUMBLE,
-};
+bool serve = true;
 
-// TODO: bool serve; simpler?
 
 typedef struct
 {
@@ -60,7 +55,6 @@ typedef struct
     char ch;
     int fc;
     int bc;
-    bool active; // TODO: remove, use dx / dy instead
 } GameObject;
 
 
@@ -73,7 +67,6 @@ GameObject ball = {
     .ch = CHAR_BALL,
     .bc = BLUE,
     .fc = WHITE, 
-    .active = false,
 };
 
 GameObject paddle_left = { 
@@ -84,7 +77,6 @@ GameObject paddle_left = {
     .ch = CHAR_PADDLE,
     .fc = GREEN, 
     .bc = BLUE,
-    .active = false,
 };
 
 GameObject paddle_right = { 
@@ -95,8 +87,6 @@ GameObject paddle_right = {
     .ch = CHAR_PADDLE,
     .fc = RED, 
     .bc = BLUE,
-    .active = false,
-
 };
 
 void KeepObjectInBounds( GameObject * paddle )
@@ -111,13 +101,16 @@ bool GetInput(int key)
         case 's': ++paddle_left.y; break;
         case 'i': --paddle_right.y; break;
         case 'k': ++paddle_right.y; break;
-        
+        case 'b': serve = false; break;
         default: break;
     }
+
     
     KeepObjectInBounds(&paddle_right);
     KeepObjectInBounds(&paddle_left);
     
+ 
+
     return true;
 }
 
@@ -130,51 +123,21 @@ void MoveBallToPreviousPosition()
 
 void UpdateGame()
 {
-    // static function variables persist between function calls
-    static int state = STATE_SERVE; // OK if state only needed in UpdateGame
 
-#if 0 // this instead?
-    bool server = true;
-    if ( server ) {
-        
-    } else {
-        
-    }
-#endif
     
-    switch (state) {
-        
-        case STATE_SERVE:
-            ball.x = SCREEN_W / 2; //could be in the other state already...
-            ball.y = SCREEN_H / 4;
-        
-                ball.active = true;
-                paddle_left.active = true;
-                paddle_right.active = true;
-                state = STATE_RUMBLE;
-            
-            break;    
-        case STATE_RUMBLE:
-            if (ball.active && paddle_left.active && paddle_right.active) {
-                ball.x += ball.dx;        
-                ball.y += ball.dy;
-            }    
-
-            if ( ball.x == MAX_X + 1 || ball.x == MIN_X - 1 )  {
-                ball.active = false;
-                paddle_left.active = false;
-                paddle_right.active = false;
-                state = STATE_SERVE;
-            }
-            break;
-        default:
-            break;
-    }    
+    if ( serve || ball.x == MAX_X + 1 || ball.x == MIN_X - 1 ) {
+        ball.x = SCREEN_W / 2;
+        ball.y = SCREEN_H / 4;
+        ball.dx = 0;
+        ball.dy = 0;    
+    } else if (!serve)  {
+        ball.x += ball.dx;        
+        ball.y += ball.dy;    
+    } 
     
     if ( ball.y == MAX_Y + 1 || ball.y == MIN_Y - 1 ) {
         MoveBallToPreviousPosition();
         ball.dy = -ball.dy;
-    
     }
 
     int hit_ch = getscreench(ball.x, ball.y);
@@ -183,15 +146,6 @@ void UpdateGame()
         play(NOTE_C, 4, 4, 120); //TODO make shorter sound
         ball.dx = - ball.dx;
     }    
-    
-    
-    
-    // handle whether ball when off screen:
-    
-    // TEMP
-    // ball went off right or left side of screen?
-    
-    // ball went off top or bottom side of screen?
 
 }
 
