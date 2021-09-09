@@ -189,7 +189,7 @@ void UpdateGame()
     int hit_ch = getscreench(ball.x, ball.y);
     if (hit_ch == CHAR_PADDLE) {
         MoveBallToPreviousPosition();
-        play(NOTE_C, 4, 8, 120); //TODO make shorter sound
+        play(NOTE_C, 4, 32, 200); //TODO make shorter sound
         ball.dx = -ball.dx;
     }    
 
@@ -216,7 +216,7 @@ void PrintScore()
 		cprintf(" ");
 	}
 
-    gotoxy(MAX_X - 4, MIN_Y);
+    gotoxy(MAX_X - 5, MIN_Y);
     textcolor(RED);
     cprintf("RED=%d", paddle_right.score);
 }
@@ -225,6 +225,7 @@ void DrawGame()
 {
     clrscr();
     gotoxy(ball.x, ball.y);
+    setbordercolor(BLUE);
     textcolor(WHITE);
     textbackground(BLACK);
     putch(7);
