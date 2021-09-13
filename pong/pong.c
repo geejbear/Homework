@@ -1,6 +1,7 @@
 // TODO: heading
 //
 
+// TODO: clean up - remove unneeded comments
 //:i TODOs
 // > inline TODOs (do a search 'TODO')
 // - copy over play source code files
@@ -41,8 +42,8 @@
 #define PADDLE_SIZE     3
 #define SERVE_COUNTER   3
 #define CHAR_BALL       7
-#define INITIAL_BALL_Y  SCREEN_H / 2
-#define INITIAL_BALL_X  SCREEN_W / 2
+#define INITIAL_BALL_Y  (SCREEN_H / 2)
+#define INITIAL_BALL_X  (SCREEN_W / 2)
 
 
 // game data
@@ -97,7 +98,7 @@ GameObject paddle_right = {
     .score = 0,
 };
 
-void KeepObjectInBounds( GameObject * paddle )
+void KeepObjectInBounds(GameObject * paddle)
 {
     clamp(&paddle->y, MIN_Y + 1, MAX_Y - 2);
 }
@@ -141,6 +142,7 @@ bool GetInput(int key)
             if ( serve ) {
                 SetPlayState();
             }
+            break;
             
         default: break;
     }
@@ -148,10 +150,9 @@ bool GetInput(int key)
     KeepObjectInBounds(&paddle_right);
     KeepObjectInBounds(&paddle_left);
     
-     return true;
+    return true;
 }
 
-// TODO: MoveBallToPreviousPosition
 void MoveBallToPreviousPosition() 
 {
     ball.x -= ball.dx;
@@ -160,8 +161,7 @@ void MoveBallToPreviousPosition()
 
 
 void UpdateGame()
-{ 
-
+{
     ball.x += ball.dx;  // put it back
     ball.y += ball.dy;  // put it back      
     
@@ -179,6 +179,7 @@ void UpdateGame()
         play(NOTE_F_SHARP, 3, 16, 120);
         SetServeState();      
     }
+    
     // ball bounces from bottom/top margins
     if ( ball.y == MAX_Y + 1 || ball.y ==  MIN_Y ) {
         MoveBallToPreviousPosition();
@@ -191,8 +192,15 @@ void UpdateGame()
         MoveBallToPreviousPosition();
         play(NOTE_C, 4, 32, 200); //TODO make shorter sound
         ball.dx = -ball.dx;
-    }    
+    }
+}
 
+void DrawGameObject(GameObject * obj)
+{
+    gotoxy(obj->x, obj->y);
+    textcolor(obj->fc);
+    textbackground(obj->bg);
+    putch(obj->ch);
 }
 
 void DrawPaddle(GameObject * paddle)
@@ -210,7 +218,7 @@ void PrintScore()
 {
     gotoxy (MIN_X, MIN_Y);
     textcolor(GREEN);
-    cprintf("GREEN=%d", paddle_left.score);
+    cprintf("GREEN=%d", paddle_left.score); // TODO: player label needed?
 
 	for (int i = 0; i < PADDLE_SIZE*5; i++) {
 		cprintf(" ");
@@ -224,19 +232,12 @@ void PrintScore()
 void DrawGame()
 {
     clrscr();
-    gotoxy(ball.x, ball.y);
-    setbordercolor(BLUE);
-    textcolor(WHITE);
-    textbackground(BLACK);
-    putch(7);
-
-
+    
+    // TODO: Print... might be better
+    DrawGameObject(&ball);
     DrawPaddle(&paddle_left);
     DrawPaddle(&paddle_right);
-
-    PrintScore();
-
-
+    PrintScore(); // TODO: consistent naming
 }
 
 int main()
@@ -246,7 +247,7 @@ int main()
     setcursor(0);
     setscreensize(SCREEN_W, SCREEN_H);
     initdos();
-    
+    setbordercolor(BLUE);
     
     int ticks = 0;
     while (1) {

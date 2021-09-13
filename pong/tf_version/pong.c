@@ -116,6 +116,7 @@ bool ProcessInput(int key)
         case 'k':
             ++paddle_right.y;
             break;
+
         case ' ':
             if ( serve ) {
                 EnterPlayState();
@@ -151,7 +152,7 @@ void ScorePointSound()
 void UpdateGame()
 {
     // update the ball's position
-    
+        
     ball.x += ball.dx;
     ball.y += ball.dy;
     
@@ -226,6 +227,7 @@ void DrawGame()
     gotoxy(SCREEN_W * 0.75, 1);
     cprintf("%d", paddle_right.score);
     
+    
     // controls:
     
     if ( serve ) {
@@ -260,7 +262,9 @@ int main()
         }
 
         if (ticks % GAME_SPEED == 0 ) {
-            UpdateGame();
+            if ( !serve ) {
+                UpdateGame();
+            }
             DrawGame();
         }
         
