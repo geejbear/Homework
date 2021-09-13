@@ -26,10 +26,11 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 
-#define SCREEN_W        20
-#define SCREEN_H        12
+#define SCREEN_W        22
+#define SCREEN_H        14
 // note: minimum x and y is 1 in turbo C
 #define MAX_X           SCREEN_W
 #define MAX_Y           SCREEN_H
@@ -40,6 +41,9 @@
 #define PADDLE_SIZE     3
 #define SERVE_COUNTER   3
 #define CHAR_BALL       7
+#define INITIAL_BALL_Y  SCREEN_H / 2
+#define INITIAL_BALL_X  SCREEN_W / 2
+
 
 // game data
 
@@ -55,18 +59,20 @@ typedef struct
     char ch;
     int fc;
     int bc;
+    int score;
 } GameObject;
 
 
 // initialize a struct all at once
 GameObject ball = {
-    .x = SCREEN_W / 2, 
-    .y = SCREEN_H / 4, 
+    .x = INITIAL_BALL_X,
+    .y = INITIAL_BALL_Y,
     .dx = 1, 
     .dy = 1,
     .ch = CHAR_BALL,
     .bc = BLUE,
     .fc = WHITE, 
+    .score = 0,
 };
 
 GameObject paddle_left = { 
@@ -77,6 +83,7 @@ GameObject paddle_left = {
     .ch = CHAR_PADDLE,
     .fc = GREEN, 
     .bc = BLUE,
+    .score = 0,
 };
 
 GameObject paddle_right = { 
@@ -87,11 +94,32 @@ GameObject paddle_right = {
     .ch = CHAR_PADDLE,
     .fc = RED, 
     .bc = BLUE,
+    .score = 0,
 };
 
 void KeepObjectInBounds( GameObject * paddle )
 {
-    clamp(&paddle->y, MIN_Y, MAX_Y - 2);
+    clamp(&paddle->y, MIN_Y + 1, MAX_Y - 2);
+}
+
+void SetServeState()
+{
+    serve = true;
+        
+    ball.x = INITIAL_BALL_X;
+    ball.y = INITIAL_BALL_Y;
+    ball.dx = 0;
+    ball.dy = 0;    
+}
+
+void SetPlayState()
+{
+    serve = false;
+
+    srand((unsigned)time(NULL));
+    
+    ball.dx = rand() % 1000 < 500 ? 1 : -1;
+    ball.dy = rand() % 1000 < 500 ? 1 : -1;
 }
 
 bool GetInput(int key)
@@ -99,9 +127,6 @@ bool GetInput(int key)
     switch (key) {
         case 'w': 
             --paddle_left.y; 
-            if (serve) {
-                serve = false;
-            }
             break;
         case 's': 
             ++paddle_left.y; 
@@ -112,6 +137,11 @@ bool GetInput(int key)
         case 'k': 
             ++paddle_right.y; 
             break;
+        case ' ':
+            if ( serve ) {
+                SetPlayState();
+            }
+            
         default: break;
     }
  
@@ -124,37 +154,43 @@ bool GetInput(int key)
 // TODO: MoveBallToPreviousPosition
 void MoveBallToPreviousPosition() 
 {
+    ball.x -= ball.dx;
+    ball.y -= ball.dy;
 }
+
 
 void UpdateGame()
 { 
+
+    ball.x += ball.dx;  // put it back
+    ball.y += ball.dy;  // put it back      
     
-    if (serve) {
-        ball.x = SCREEN_W / 2;
-        ball.y = SCREEN_H / 4;
-        ball.dx = 0;
-        ball.dy = 0;    
-        
-    } else  {
-        ball.x -= ball.dx;  // put it back
-        ball.y -= ball.dy;  // put it back
-          
-    }
     
-    if (ball.x == MAX_X + 1 || ball.x == MIN_X - 1) {
-        serve = true;
+    if (ball.x == MAX_X + 1) {
+        paddle_left.score++;
+        play(NOTE_C, 4, 16, 120);
+        play(NOTE_F_SHARP, 3, 16, 120);
+        SetServeState();
     }
 
-    if ( ball.y == MAX_Y + 1 || ball.y == MIN_Y - 1 ) {
+    if (ball.x == MIN_X - 1) {
+        paddle_right.score++;
+        play(NOTE_C, 4, 16, 120);
+        play(NOTE_F_SHARP, 3, 16, 120);
+        SetServeState();      
+    }
+    // ball bounces from bottom/top margins
+    if ( ball.y == MAX_Y + 1 || ball.y ==  MIN_Y ) {
         MoveBallToPreviousPosition();
         ball.dy = -ball.dy;
     }
 
+    // ball bounce from paddle     
     int hit_ch = getscreench(ball.x, ball.y);
     if (hit_ch == CHAR_PADDLE) {
         MoveBallToPreviousPosition();
-        play(NOTE_C, 4, 4, 120); //TODO make shorter sound
-        ball.dx = - ball.dx;
+        play(NOTE_C, 4, 32, 200); //TODO make shorter sound
+        ball.dx = -ball.dx;
     }    
 
 }
@@ -170,10 +206,26 @@ void DrawPaddle(GameObject * paddle)
     }
 }
 
+void PrintScore()
+{
+    gotoxy (MIN_X, MIN_Y);
+    textcolor(GREEN);
+    cprintf("GREEN=%d", paddle_left.score);
+
+	for (int i = 0; i < PADDLE_SIZE*5; i++) {
+		cprintf(" ");
+	}
+
+    gotoxy(MAX_X - 5, MIN_Y);
+    textcolor(RED);
+    cprintf("RED=%d", paddle_right.score);
+}
+
 void DrawGame()
 {
     clrscr();
     gotoxy(ball.x, ball.y);
+    setbordercolor(BLUE);
     textcolor(WHITE);
     textbackground(BLACK);
     putch(7);
@@ -181,6 +233,10 @@ void DrawGame()
 
     DrawPaddle(&paddle_left);
     DrawPaddle(&paddle_right);
+
+    PrintScore();
+
+
 }
 
 int main()
@@ -198,8 +254,10 @@ int main()
             GetInput(getch());
         }
 
-        if ( ticks % 10 == 0 ) {
-            UpdateGame();
+        if ( ticks % 5 == 0 ) {
+            if (!serve) {
+                UpdateGame();
+            }
             DrawGame();
         }
         
