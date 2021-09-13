@@ -1,23 +1,11 @@
-// TODO: heading
-//
+/*
+ * Title: PONG CLONE
+ * Author: Geejbear
+ * Date: 13.09.21
+ * Revision: Tomas Foster 
+ * Created with the LibTC Turbo C library (https://github.com/teefoss/LibTC)
+ */
 
-// TODO: clean up - remove unneeded comments
-//:i TODOs
-// > inline TODOs (do a search 'TODO')
-// - copy over play source code files
-// - think about is clamp a useful thing to have
-// - serve state, play state
-// - - serve: ball position is reset
-// - - serve: ball stays until key press to start round
-// - - play: ball goes off side: set to serve state, reset ball
-
-// NOTES
-// - ...
-
-// BUGS
-
-// "" includes: relative to current path
-// <> includes: where the compiler looks for headers (-I)
 #include <play.h>
 #include <utility.h>
 #include <ascii.h>
@@ -58,8 +46,8 @@ typedef struct
     int dx;
     int dy;
     char ch;
-    int fc;
-    int bc;
+    int fg;
+    int bg;
     int score;
 } GameObject;
 
@@ -71,8 +59,8 @@ GameObject ball = {
     .dx = 1, 
     .dy = 1,
     .ch = CHAR_BALL,
-    .bc = BLUE,
-    .fc = WHITE, 
+    .bg = 0,
+    .fg = WHITE, 
     .score = 0,
 };
 
@@ -82,8 +70,8 @@ GameObject paddle_left = {
     .dx = 0,
     .dy = 0,
     .ch = CHAR_PADDLE,
-    .fc = GREEN, 
-    .bc = BLUE,
+    .fg = GREEN, 
+    .bg = BLUE,
     .score = 0,
 };
 
@@ -93,8 +81,8 @@ GameObject paddle_right = {
     .dx = 0, 
     .dy = 0,
     .ch = CHAR_PADDLE,
-    .fc = RED, 
-    .bc = BLUE,
+    .fg = RED, 
+    .bg = BLUE,
     .score = 0,
 };
 
@@ -190,23 +178,23 @@ void UpdateGame()
     int hit_ch = getscreench(ball.x, ball.y);
     if (hit_ch == CHAR_PADDLE) {
         MoveBallToPreviousPosition();
-        play(NOTE_C, 4, 32, 200); //TODO make shorter sound
+        play(NOTE_C, 4, 32, 200); 
         ball.dx = -ball.dx;
     }
 }
 
-void DrawGameObject(GameObject * obj)
+void PrintGameObject(GameObject * obj)
 {
     gotoxy(obj->x, obj->y);
-    textcolor(obj->fc);
+    textcolor(obj->fg);
     textbackground(obj->bg);
     putch(obj->ch);
 }
 
-void DrawPaddle(GameObject * paddle)
+void PrintPaddle(GameObject * paddle)
 {
-    textcolor(paddle->fc);
-    textbackground(paddle->bc);
+    textcolor(paddle->fg);
+    textbackground(paddle->bg);
 
     for ( int y = paddle->y; y < paddle->y + PADDLE_SIZE; y++ ) {
         gotoxy(paddle->x, y);
@@ -218,26 +206,29 @@ void PrintScore()
 {
     gotoxy (MIN_X, MIN_Y);
     textcolor(GREEN);
-    cprintf("GREEN=%d", paddle_left.score); // TODO: player label needed?
+    cprintf("[%d]", paddle_left.score); 
 
-	for (int i = 0; i < PADDLE_SIZE*5; i++) {
+	for (int i = 0; i < MAX_X - 4; i++) {
 		cprintf(" ");
 	}
+    
+    //fills in the right top corner allowing bidecimal count without blue square bug.
+    gotoxy(MAX_X, MIN_Y);
+    cprintf(" ");
 
     gotoxy(MAX_X - 5, MIN_Y);
     textcolor(RED);
-    cprintf("RED=%d", paddle_right.score);
+    cprintf("[%d]", paddle_right.score);
 }
 
 void DrawGame()
 {
     clrscr();
     
-    // TODO: Print... might be better
-    DrawGameObject(&ball);
-    DrawPaddle(&paddle_left);
-    DrawPaddle(&paddle_right);
-    PrintScore(); // TODO: consistent naming
+    PrintGameObject(&ball);
+    PrintPaddle(&paddle_left);
+    PrintPaddle(&paddle_right);
+    PrintScore(); 
 }
 
 int main()
