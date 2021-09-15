@@ -13,28 +13,6 @@ typedef struct
 } Color;
 #endif
 
-
-#if 1 // TEMP
-void PrintColor32(uint32_t color32)
-{
-    // 6. additional practice: complete this function
-	uint32_t mask = 0xFF000000;   
-	uint8_t red = (color32 & mask) >> 24;
-	
-	mask = 0x00FF0000;   
-	uint8_t green = (color32 & mask) >> 16;
-	
-	mask = 0x0000FF00;   
-	uint8_t blue = (color32 & mask) >> 8;
-	
-	mask = 0x000000FF;   
-	uint8_t alpha = color32 & mask;
-    
-    printf("0x%08X (%d, %d, %d, %d)\n", color32, red, green, blue, alpha);
-}
-#endif
-
-
 Color ColorFrom32(uint32_t color)
 {
     Color result;
@@ -53,6 +31,17 @@ Color ColorFrom32(uint32_t color)
         
     return result;
 }
+
+
+#if 1 // TEMP
+void PrintColor32(uint32_t color32)
+{
+	Color clr = ColorFrom32(color32);
+
+    // 6. additional practice: complete this function
+    printf("0x%08X (%d, %d, %d, %d)\n", color32, clr.red, clr.green, clr.blue, clr.alpha);
+}
+#endif
 
 
 int main()
@@ -91,8 +80,7 @@ int main()
     uint8_t red = (color & mask) >> 24;
     
     printf("red component: 0x%02X (%d)\n", red, red);
-	PrintColor32(color);
 
-	
+
     return 0;
 }
