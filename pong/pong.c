@@ -246,7 +246,7 @@ int main()
             GetInput(getch());
         }
 
-        if ( ticks % 5 == 0 ) {
+        if ( ticks % 10 == 0 ) {
             if (!serve) {
                 UpdateGame();
             }
