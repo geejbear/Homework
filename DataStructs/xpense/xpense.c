@@ -1,82 +1,90 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define MAX_STACK_SIZE 10 // TODO: rename (it's not a stack) MAX_EXPENSES
-// TODO: something large like 1000
+#include <stdbool.h>
+#define MAX_ARRAY_SIZE 10
 
-#if 0
-float add(float nums[MAX_STACK_SIZE], float n)
+enum
 {
-    float *sum = malloc( n * sizeof(float));
+    MENU_ENTER_AMOUNT = 1,
+    MENU_DISPLAY_AMOUNTS,
+    MENU_COUNT,
 
-    for (int i = 0; i < MAX_STACK_SIZE; i++) {
-        nums[i] = nums[i - 1] + nums[i]; //the algorithm for summing all the numbers together
-        printf("%f\n", nums[i]);
-    }    
-    
-    free(sum);
+};
 
-    return 0;
+char *menu[] = {"Enter amount", "Display amounts"};
+
+void PrintMenu()
+{
+    for (int i = 0; i < MENU_COUNT - 1; i++) {
+        printf("\n[%d]%s\n", i + 1, menu[i]);
+    }
 }
-#endif
 
 int main()
 {    
     //initializing a new array
- 
-    float array[MAX_STACK_SIZE]; // more descriptive name: expenses
-    float amount = 0;
-    int index = 0; // rename: num_expenses
-
-    // TODO: only enter as many expenses as user has/wants
-    // 1. enter amount spent
-    printf("enter \"0\" to stop\n"); // for example
-	while (index < MAX_STACK_SIZE) {
+    
+    float array[MAX_ARRAY_SIZE] = {0};
+    float amount = 00.00;
+    float total = 00.00;
+    
+    int index = 0;
+    bool running = true;
         
-        printf("enter the amount spent:\n"); // print once at the start ?
-        // for each line: "amount: %f" ?
-	    scanf("%f", &amount); 
-        printf("\n");
-        array[index] = amount;
-        index++;
+    
+    // 1. enter amount spent
+	while ( running ) {
+        
+        PrintMenu();
+        
+        int key;
+        scanf("%d", &key);
+        
+        switch (key) {
+
+            case MENU_ENTER_AMOUNT:
+                if (key == 1) {
+                    printf("Amount: ");
+	                scanf("%f", &amount); 
+                    array[index] = amount;
+                    index++;
+                    if (amount == 0 || index >= MAX_ARRAY_SIZE) {
+                        printf("quiting...");
+                        return 0;
+                    }
+                    break;
+                }    
+            case MENU_DISPLAY_AMOUNTS:
+                if (key == 2) {
+                    
+                    total = 0;
+                   
+                    for (int i = 0; i < MAX_ARRAY_SIZE; i++) { 
+                        printf("€%.2f\n", array[i]);
+                        total += array[i]; 
+                    }
+                    printf("\ntotal:\n €%.2f\n", total);
+                }
+                FILE * fp;
+	            fp = fopen("xpense.txt", "w");
+	            if (fp == NULL) {
+	            	printf("fopen failed");
+	            	return 1;
+	            }
+
+                for (int i = 0; i < MAX_ARRAY_SIZE; i++) { //list of values are saved in the file
+	                fprintf(fp, "€%.2f\n", array[i]);
+                }
+
+                fprintf(fp, "\ntotal:\n€%.2f\n", total);
+            
+                fclose(fp);
+                    
+                break; 
+            
+            default: break;
+        }
     }
-    
-    //values are temporarily listed on the prompter
-    // TODO: use num_expenses to only print those entered
-    for (int i = 0; i < MAX_STACK_SIZE; i++) { 
-        printf("€%.2f\n", array[i]);
-    }
-    
-    // 2. save values in file
-	
-    #if 1
-    FILE * fp = fopen("xpense.txt", "w");
-	if (fp == NULL) {
-		printf("fopen failed\n"); // use fprint and stderr
-		return 1;
-	}
-    
-    // TODO: use num_expenses
-    for (int i = 0; i < MAX_STACK_SIZE; i++) { //list of values are saved in the file
-	    fprintf(fp, "€%.2f\n", array[i]);
-    }
-    
-    fclose(fp);
-    #endif
-    
-    //values are added up
-    
-    // TODO: int total = 0; // (this is the simplest way, memorize it)
-    
-    for (int i = 0; i < MAX_STACK_SIZE; i++) {
-        //the calculation is made with the algorithm for summing all the numbers together
-        array[i] = array[i - 1] + array[i];
-        // TODO: total += array[i];
-    }
-    
-    //the total is printed
-    
-    printf("total: €%.2f\n", array[MAX_STACK_SIZE - 1]);
-    
 
     return 0;
 }
