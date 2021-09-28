@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#define MAX_ARRAY_SIZE 10
+#define MAX_ARRAY_SIZE 100
 
 enum
 {
@@ -21,17 +21,32 @@ void PrintMenu()
 }
 
 int main()
-{    
-    //initializing a new array
-    
-    float array[MAX_ARRAY_SIZE] = {0};
+{        
+    float array[MAX_ARRAY_SIZE] = {'\0'};
     float amount = 00.00;
     float total = 00.00;
     
     int index = 0;
     bool running = true;
+
+    FILE * fp;
+    fp = fopen("xpense.txt", "r");
+
+    if (fp != NULL) {
+        printf("laoding amounts from file...\n");
+    }
+
+    for (int i = 0; i < MAX_ARRAY_SIZE; i++) { 
+	    fscanf(fp, "€%f\n", &array[i]);
+        if (array[i] != 00.00) {
+            index++;
+        }
+    }
+
+    fscanf(fp, "\ntotal:\n€%f\n", &total);
+            
+    fclose(fp);
         
-    
     // 1. enter amount spent
 	while ( running ) {
         
@@ -48,18 +63,20 @@ int main()
 	                scanf("%f", &amount); 
                     array[index] = amount;
                     index++;
-                    if (amount == 0 || index >= MAX_ARRAY_SIZE) {
-                        printf("quiting...");
-                        return 0;
-                    }
-                    break;
-                }    
+                }
+
+                if (amount == 0 || index >= MAX_ARRAY_SIZE) {
+                    printf("quiting...");
+                    return 0;
+                }
+                break;
+       
             case MENU_DISPLAY_AMOUNTS:
                 if (key == 2) {
                     
                     total = 0;
                    
-                    for (int i = 0; i < MAX_ARRAY_SIZE; i++) { 
+                    for (int i = 0; i < index; i++) { 
                         printf("€%.2f\n", array[i]);
                         total += array[i]; 
                     }
@@ -72,7 +89,7 @@ int main()
 	            	return 1;
 	            }
 
-                for (int i = 0; i < MAX_ARRAY_SIZE; i++) { //list of values are saved in the file
+                for (int i = 0; i < index; i++) { 
 	                fprintf(fp, "€%.2f\n", array[i]);
                 }
 
