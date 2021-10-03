@@ -22,11 +22,11 @@ void PrintMenu()
 
 int main()
 {        
-    float array[MAX_ARRAY_SIZE] = {'\0'};
+    float expenses[MAX_ARRAY_SIZE] = {'\0'};
     float amount = 00.00;
     float total = 00.00;
     
-    int index = 0;
+    int expense = 0;
     bool running = true;
 
     FILE * fp;
@@ -37,17 +37,16 @@ int main()
     }
 
     for (int i = 0; i < MAX_ARRAY_SIZE; i++) { 
-	    fscanf(fp, "€%f\n", &array[i]);
-        if (array[i] != 00.00) {
-            index++;
+	    fscanf(fp, "€%f\n", &expenses[i]);
+        if (expenses[i] != 00.00) {
+            expense++;
         }
     }
 
     fscanf(fp, "\ntotal:\n€%f\n", &total);
             
-    fclose(fp);
-        
-    // 1. enter amount spent
+    fclose(fp);    
+    
 	while ( running ) {
         
         PrintMenu();
@@ -61,14 +60,30 @@ int main()
                 if (key == 1) {
                     printf("Amount: ");
 	                scanf("%f", &amount); 
-                    array[index] = amount;
-                    index++;
+                    expenses[expense] = amount;
+                    expense++;
                 }
+                
 
-                if (amount == 0 || index >= MAX_ARRAY_SIZE) {
+                if (amount == 0 || expense >= MAX_ARRAY_SIZE) {
                     printf("quiting...");
                     return 0;
                 }
+                
+                FILE * fp;
+                fp = fopen("xpense.txt", "w");
+
+	            if (fp == NULL) {
+	            	printf("fopen failed");
+	            	return 1;
+                }
+                for (int i = 0; i < expense; i++) { 
+	                fprintf(fp, "€%.2f\n", expenses[i]);
+                }
+                fprintf(fp, "\ntotal:\n€%.2f\n", total);
+
+                fclose(fp);
+                
                 break;
        
             case MENU_DISPLAY_AMOUNTS:
@@ -76,26 +91,13 @@ int main()
                     
                     total = 0;
                    
-                    for (int i = 0; i < index; i++) { 
-                        printf("€%.2f\n", array[i]);
-                        total += array[i]; 
+                    for (int i = 0; i < expense; i++) { 
+                        printf("€%.2f\n", expenses[i]);
+                        total += expenses[i]; 
                     }
                     printf("\ntotal:\n €%.2f\n", total);
                 }
-                FILE * fp;
-	            fp = fopen("xpense.txt", "w");
-	            if (fp == NULL) {
-	            	printf("fopen failed");
-	            	return 1;
-	            }
-
-                for (int i = 0; i < index; i++) { 
-	                fprintf(fp, "€%.2f\n", array[i]);
-                }
-
-                fprintf(fp, "\ntotal:\n€%.2f\n", total);
-            
-                fclose(fp);
+                
                     
                 break; 
             
