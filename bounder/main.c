@@ -47,8 +47,6 @@ int main()
     int player_y = CONSOLE_H / 2;
 
     
-    
-    
     // program loop:
     bool running = true;
     while ( running ) {
