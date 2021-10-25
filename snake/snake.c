@@ -8,6 +8,16 @@
 #include <stdbool.h>
 #include <time.h>
 
+// TODO: snake movement operation/algorithm
+// TODO: plan apple eating logic
+// Plan: (take stock of everything)
+// when snake head x, y == apple x, y:
+// - snake len ++
+// - new apple i.e. change apple location (random)
+// TODO: snake death
+// Plan:
+// -
+
 #define CONSOLE_W 20
 #define CONSOLE_H 20
 #define CONSOLE_SIZE (CONSOLE_W * CONSOLE_H)
@@ -114,15 +124,17 @@ int main()
         // 3) RENDER GAME
         DOS_ClearScreen();
         
-            // draw player
+        // draw player
         
+        //printf("-------------\n");
         for ( int i = 0; i < SNAKE_INITIAL_LENGTH; i++) {
+            //printf("snake segment %d position: (%d, %d)\n", i, snake[i].x, snake[i].y);
             DOS_GotoXY(snake[i].x, snake[i].y);
             DOS_SetForeground(DOS_GREEN);
             DOS_PrintChar(219);
         }
         
-            // draw apple
+        // TEMP: draw apple
         int apple_x = CONSOLE_W / 4;
         int apple_y = CONSOLE_H / 4;
 
