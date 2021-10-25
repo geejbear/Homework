@@ -16,47 +16,14 @@
 #define FPS 30
 #define SECONDS(x) (int)((float)(x) * (float)FPS)
 #define UPDATE_INTERVAL_TICKS 15 // how often (interval) does game update
-#define SNAKE_BODY 3 // SNAKE_INITIAL_LENGTH 3
+#define SNAKE_INITIAL_LENGTH 4 
 
-//Bugs:
-// Redifine input to avoid syncopation when the snake is turned
 
 // example: probably better than a macro
 int SecondsToTicks(float seconds)
 {
     return seconds * (float)FPS;
 }
-
-typedef struct
-{
-    int x, y;
-    int dx, dy;
-    int ch;
-    int color;
-    bool active; 
-} Entity;
-
-Entity snake = {
-    .x = CONSOLE_W / 2,
-    .y = CONSOLE_H / 2,
-    .dx = 0,
-    .dy = -1, // TF: start at 0
-    //.ch = DOS_SQUARE,
-    .ch = 'S',
-    .color = DOS_GRAY,
-    .active = true,
-};
-
-Entity apple = {
-    .x = CONSOLE_W / 4,
-    .y = CONSOLE_H / 4,
-    .dx = 0,
-    .dy = 0,
-    //.ch = DOS_DOT1,
-    .ch = 'A',
-    .color = DOS_RED,
-    .active = true,
-};
 
 typedef struct {
     int x;
@@ -66,8 +33,7 @@ typedef struct {
 // snake data structure
 #define SNAKE_MAX_LEN CONSOLE_SIZE
 int dx, dy;
-Point _snake[SNAKE_MAX_LEN];
-int snake_len = SNAKE_BODY;
+Point snake[SNAKE_MAX_LEN];
 
 int main()
 {
@@ -82,11 +48,10 @@ int main()
     
     // initial snake
     dx = dy = 0;
-    for ( int i = 0; i < snake_len; i++ ) {
-        _snake[i].x = CONSOLE_W / 2;
-        _snake[i].y = CONSOLE_H / 2;
+    for ( int i = 0; i < SNAKE_MAX_LEN; i++ ) {
+        snake[i].x = CONSOLE_W / 2;
+        snake[i].y = CONSOLE_H / 2;
     }
-    
     
     // program loop:
 
@@ -106,25 +71,24 @@ int main()
                     break;
                 case SDL_KEYDOWN:
                     // TODO: switch
-                    if ( event.key.keysym.sym == SDLK_ESCAPE) {
+                    if ( event.key.keysym.sym == SDLK_ESCAPE ) {
                         running = false;
                     }
-                    
                     if ( event.key.keysym.sym == SDLK_UP ) {
-                        snake.dy = -1;
-                        snake.dx = 0;
+                        dx = 0;
+                        dy = -1;
                     }
-                    else if ( event.key.keysym.sym == SDLK_LEFT  ) {
-                        snake.dx = -1;
-                        snake.dy = 0;
+                    else if ( event.key.keysym.sym == SDLK_LEFT ) {
+                        dx = -1;
+                        dy = 0;
                     }
                     else if ( event.key.keysym.sym == SDLK_RIGHT ) {
-                        snake.dx = +1;
-                        snake.dy = 0;
+                        dx = +1;
+                        dy = 0;
                     }
                     else if ( event.key.keysym.sym == SDLK_DOWN ) {
-                        snake.dy = +1;
-                        snake.dx = 0;
+                        dx = 0;
+                        dy = +1;
                     }
                     break;
                 default:
@@ -134,40 +98,40 @@ int main()
 
         // 2) SIMULATE/UPDATE GAME
         
-        if (ticks % SECONDS(0.5f) == 0) {
-            snake.x += snake.dx;
-            snake.y += snake.dy;
+        if ( ticks % SECONDS(0.5f) == 0 ) {
 
             // temp: dx dy affects head of snake
-            _snake[0].x += dx;
-            _snake[0].y += dy;
-//            for ( int segment_index = ?; segment_index ?; segment_index ?) {
-                
-//            }
+            snake[0].x += dx;
+            snake[0].y += dy;
+            
+            for ( int index = 0; index < SNAKE_MAX_LEN; index++ ) {
+                DOS_GotoXY(snake[index].x, snake[index].y);
+                DOS_SetForeground(DOS_BLUE);
+                DOS_PrintChar(219);
+            }
         }
-        
-        //Ask Tom about printf ticks 
-      
+              
         // 3) RENDER GAME
         DOS_ClearScreen();
         
+            // draw player
         
-        // draw player
-        int segs[SNAKE_BODY];
-        DOS_GotoXY(snake.x, snake.y);
-//        DOS_PrintChar(snake.ch);
-        for ( int i = 0; i < snake_len; i++ ) {
-            DOS_GotoXY(_snake[i].x, _snake[i].y);
-            DOS_SetForeground(DOS_BLUE);
+        for ( int i = 0; i < SNAKE_INITIAL_LENGTH; i++) {
+            DOS_GotoXY(snake[i].x, snake[i].y);
+            DOS_SetForeground(DOS_GREEN);
             DOS_PrintChar(219);
         }
         
-        
-        // draw apple
-    
-        DOS_GotoXY(apple.x, apple.y);
-        DOS_SetForeground(apple.color);
-        DOS_PrintChar(apple.ch);  
+            // draw apple
+        int apple_x = CONSOLE_W / 4;
+        int apple_y = CONSOLE_H / 4;
+
+        char apple_ch = 'A';
+        int apple_cl = DOS_RED;
+
+        DOS_GotoXY(apple_x, apple_y);
+        DOS_SetForeground(apple_cl);
+        DOS_PrintChar(apple_ch);  
         
 
         DOS_DrawScreen();
