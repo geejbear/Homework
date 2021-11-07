@@ -58,7 +58,7 @@ typedef struct {
 int dx, dy;
 Point snake[SNAKE_MAX_LEN];
 
-int apples_eaten = SNAKE_INITIAL_LENGTH;  
+int snake_body = SNAKE_INITIAL_LENGTH;  
 
 int main()
 {
@@ -153,14 +153,24 @@ int main()
         //===============================================
 
         // 2) SIMULATE/UPDATE GAME
-        //printf("%d\n", apples_eaten); //debug
+        //printf("%d\n", snake_body); //debug
 
         if ( apple.x == snake[0].x && apple.y == snake[0].y ) {
             apple.active = false;
-            apples_eaten++;        
-            //TODO: print new apple before increasing array.
+
+        } else if ( !apple.active ) {
+            apple.x = rand() % CONSOLE_W;
+            apple.y = rand() % CONSOLE_H;
+            
+            DOS_GotoXY(apple.x, apple.y);
+            DOS_SetForeground(apple.fc);
+            DOS_PrintChar(apple.ch);  
+            
+            apple.active = true;
+            snake_body++;        
         }
 
+      
         if ( ticks % SECONDS(0.3f) == 0 ) {
             // temp: dx dy affects head of snake
             snake[0].x += dx;
@@ -179,7 +189,7 @@ int main()
         
         // draw snake
         
-        for ( int i = 0; i < apples_eaten; i++ ) {
+        for ( int i = 0; i < snake_body; i++ ) {
             DOS_GotoXY(snake[i].x, snake[i].y);
             DOS_SetForeground(snake_cl);
             DOS_PrintChar(snake_ch);
