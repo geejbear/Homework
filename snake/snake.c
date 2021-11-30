@@ -18,8 +18,8 @@
 // Plan:
 // -
 
-#define CONSOLE_W 20
-#define CONSOLE_H 20
+#define CONSOLE_W 15
+#define CONSOLE_H 15
 #define CONSOLE_SIZE (CONSOLE_W * CONSOLE_H)
 
 #define MIN_X 0
@@ -32,6 +32,15 @@
 #define SECONDS(x) (int)((float)(x) * (float)FPS)
 #define UPDATE_INTERVAL_TICKS 15 // how often (interval) does game update
 #define SNAKE_INITIAL_LENGTH 4 
+#define SNAKE_MAX_LEN CONSOLE_SIZE
+
+void RenderApple(int x, int y, char ch, int fc)
+{
+    DOS_GotoXY(x, y);
+    DOS_SetForeground(fc);
+    DOS_PrintChar(ch); 
+}
+
 
 // example: probably better than a macro
 int SecondsToTicks(float seconds)
@@ -53,12 +62,57 @@ typedef struct {
     bool active;
 } Entity;
 
+enum
+{
+    QUIT,
+    UP,
+    LEFT,
+    RIGHT,
+    DOWN,
+};
+
 // snake data structure
-#define SNAKE_MAX_LEN CONSOLE_SIZE
 int dx, dy;
 Point snake[SNAKE_MAX_LEN];
+int snake_body = SNAKE_INITIAL_LENGTH; 
 
-int snake_body = SNAKE_INITIAL_LENGTH;  
+/* void Input(int key, bool running, SDL_Event event)
+{
+    switch ( key ) {
+
+        case SDLK_ESCAPE:
+            if ( event.key.keysym.sym == SDLK_ESCAPE ) {
+                running = false;
+            }
+            break;
+        case SDLK_UP:
+            if ( event.key.keysym.sym == SDLK_UP ) {
+                dx = 0;
+                dy = -1;
+            }
+            break;
+        case SDLK_LEFT:
+            if ( event.key.keysym.sym == SDLK_LEFT ) {
+                dx = -1;
+                dy = 0;
+            }
+            break;
+        case SDLK_RIGHT:
+            if ( event.key.keysym.sym == SDLK_RIGHT ) {
+                dx = +1;
+                dy = 0;
+            }
+            break;
+        case SDLK_DOWN:
+            if ( event.key.keysym.sym == SDLK_DOWN ) {
+                dx = 0;
+                dy = +1;
+            }
+            break;
+        default:
+            break;
+    }
+} */
 
 int main()
 {
@@ -80,7 +134,7 @@ int main()
 
     for ( int i = 0; i < SNAKE_MAX_LEN; i++ ) {
         snake[i].x = CONSOLE_W / 2;
-        snake[i].y = CONSOLE_H / 2;
+        snake[i].y = CONSOLE_H / 2; 
     }
     //init apple
     srand((unsigned)time(NULL));
@@ -94,14 +148,12 @@ int main()
         .active = true,
     };
 
-    DOS_GotoXY(apple.x, apple.y);
-    DOS_SetForeground(apple.fc);
-    DOS_PrintChar(apple.ch);  
+   RenderApple(apple.x, apple.y, apple.ch, apple.fc);
 
     //===================================================
 
     // program loop:
-    dx = dy = 0;
+    dx = 0, dy = -1;
     int ticks = 0;
     bool running = true;
     while ( running ) {
@@ -117,7 +169,7 @@ int main()
                     running = false;
                     break;
                 case SDL_KEYDOWN:
-                    // TODO: switch
+                    //Input(SDL_KEYDOWN, running, event);
                     if ( event.key.keysym.sym == SDLK_ESCAPE ) {
                         running = false;
                     }
@@ -140,42 +192,68 @@ int main()
                     break;
                 default:
                     break;
+                }
+        }
+
+        if ( snake[0].x == MIN_X - 1 || snake[0].x == CONSOLE_W ) {
+            snake_body = SNAKE_INITIAL_LENGTH;
+            for ( int i = 0; i < SNAKE_MAX_LEN; i++ ) {
+                snake[i].x = CONSOLE_W / 2;
+                snake[i].y = CONSOLE_H / 2 + i;
+            }
+
+        }    
+       
+        if ( snake[0].y == MIN_Y - 1 || snake[0].y == CONSOLE_H ) {
+            snake_body = SNAKE_INITIAL_LENGTH;
+            for ( int i = 0; i < SNAKE_MAX_LEN; i++ ) {
+                snake[i].x = CONSOLE_W / 2;
+                snake[i].y = CONSOLE_H / 2 + i;
             }
         }
 
-        // clamp-like code where snake bounces off the walls.
-        if ( snake[0].x == MIN_X || snake[0].x == CONSOLE_W - 1 ) {
-            dx = -dx;
+
+        //if head colides with body, snakes jumps back to the start position
+        for ( int i = snake_body; i > 1; i-- ) {
+
+            if (( snake[0].x == snake[i].x) && (snake[0].y == snake[i].y )) {
+                snake_body = SNAKE_INITIAL_LENGTH;
+                for ( int j = 0; j < SNAKE_MAX_LEN; j++ ) {
+                    snake[j].x = CONSOLE_W / 2;
+                    snake[j].y = CONSOLE_H / 2;
+                }
+            }
         }
-        if ( snake[0].y == MIN_Y || snake[0].y == CONSOLE_H - 1 ) {
-            dy = -dy;
-        }
+        
         //===============================================
 
         // 2) SIMULATE/UPDATE GAME
-        //printf("%d\n", snake_body); //debug
 
         if ( apple.x == snake[0].x && apple.y == snake[0].y ) {
             apple.active = false;
 
         } else if ( !apple.active ) {
+            DOS_InitSound();
+            DOS_Sound(880, 70);        
+            DOS_Sound(1720, 70);        
+            
+            
             apple.x = rand() % CONSOLE_W;
             apple.y = rand() % CONSOLE_H;
             
-            DOS_GotoXY(apple.x, apple.y);
-            DOS_SetForeground(apple.fc);
-            DOS_PrintChar(apple.ch);  
+            RenderApple(apple.x, apple.y, apple.ch, apple.fc);
+  
+            snake_body++;
             
             apple.active = true;
-            snake_body++;        
         }
 
-      
         if ( ticks % SECONDS(0.3f) == 0 ) {
             // temp: dx dy affects head of snake
             snake[0].x += dx;
             snake[0].y += dy;
             
+       
             for ( int i = SNAKE_MAX_LEN; i > 0; i-- ) {
                 snake[i].x = snake[i-1].x;
                 snake[i].y = snake[i-1].y;
@@ -198,9 +276,7 @@ int main()
         // TEMP: draw apple
 
         if ( apple.active ) {
-            DOS_GotoXY(apple.x, apple.y);
-            DOS_SetForeground(apple.fc);
-            DOS_PrintChar(apple.ch);  
+            RenderApple(apple.x, apple.y, apple.ch, apple.fc);
         }
         
         DOS_DrawScreen();
