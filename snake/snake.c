@@ -31,7 +31,7 @@
 #define FPS 30
 #define SECONDS(x) (int)((float)(x) * (float)FPS)
 #define UPDATE_INTERVAL_TICKS 15 // how often (interval) does game update
-#define SNAKE_INITIAL_LENGTH 4 
+#define SNAKE_INITIAL_LENGTH 3 
 #define SNAKE_MAX_LEN CONSOLE_SIZE
 
 void RenderApple(int x, int y, char ch, int fc)
@@ -48,9 +48,25 @@ int SecondsToTicks(float seconds)
     return seconds * (float)FPS;
 }
 
+void CollectAppleSoundEffect()
+{
+    DOS_InitSound();
+    DOS_Sound(880, 70);        
+    DOS_Sound(1720, 70);
+}
+
+void RenderSnakeToTheMiddle(int point_x[], int point_y[])
+{
+    for ( int i = 0; i < SNAKE_MAX_LEN; i++ ) {
+        point_x[i] = CONSOLE_W / 2;
+        point_y[i] = CONSOLE_H / 2 + i;
+    }
+}
+
 typedef struct {
     int x;
     int y;
+    bool active;
 } Point;
 
 typedef struct {
@@ -61,15 +77,6 @@ typedef struct {
     int bc;
     bool active;
 } Entity;
-
-enum
-{
-    QUIT,
-    UP,
-    LEFT,
-    RIGHT,
-    DOWN,
-};
 
 // snake data structure
 int dx, dy;
@@ -131,10 +138,12 @@ int main()
     // initial snake
     char snake_ch = 0xB1;
     int snake_cl = DOS_GREEN;
-
+    
+    snake[snake_body].active = true;
+    
     for ( int i = 0; i < SNAKE_MAX_LEN; i++ ) {
         snake[i].x = CONSOLE_W / 2;
-        snake[i].y = CONSOLE_H / 2; 
+        snake[i].y = CONSOLE_H / 2 + i; 
     }
     //init apple
     srand((unsigned)time(NULL));
@@ -195,33 +204,18 @@ int main()
                 }
         }
 
-        if ( snake[0].x == MIN_X - 1 || snake[0].x == CONSOLE_W ) {
+        if (( snake[0].x == MIN_X - 1 || snake[0].x == CONSOLE_W ) || 
+             ( snake[0].y == MIN_Y - 1 || snake[0].y == CONSOLE_H )) {
             snake_body = SNAKE_INITIAL_LENGTH;
-            for ( int i = 0; i < SNAKE_MAX_LEN; i++ ) {
-                snake[i].x = CONSOLE_W / 2;
-                snake[i].y = CONSOLE_H / 2 + i;
-            }
+            RenderSnakeToTheMiddle(&snake[0].x, &snake[0].y);
 
         }    
-       
-        if ( snake[0].y == MIN_Y - 1 || snake[0].y == CONSOLE_H ) {
-            snake_body = SNAKE_INITIAL_LENGTH;
-            for ( int i = 0; i < SNAKE_MAX_LEN; i++ ) {
-                snake[i].x = CONSOLE_W / 2;
-                snake[i].y = CONSOLE_H / 2 + i;
-            }
-        }
-
 
         //if head colides with body, snakes jumps back to the start position
         for ( int i = snake_body; i > 1; i-- ) {
-
             if (( snake[0].x == snake[i].x) && (snake[0].y == snake[i].y )) {
                 snake_body = SNAKE_INITIAL_LENGTH;
-                for ( int j = 0; j < SNAKE_MAX_LEN; j++ ) {
-                    snake[j].x = CONSOLE_W / 2;
-                    snake[j].y = CONSOLE_H / 2;
-                }
+                RenderSnakeToTheMiddle(&snake[0].x, &snake[0].y);
             }
         }
         
@@ -233,10 +227,7 @@ int main()
             apple.active = false;
 
         } else if ( !apple.active ) {
-            DOS_InitSound();
-            DOS_Sound(880, 70);        
-            DOS_Sound(1720, 70);        
-            
+            CollectAppleSoundEffect();      
             
             apple.x = rand() % CONSOLE_W;
             apple.y = rand() % CONSOLE_H;
@@ -250,14 +241,12 @@ int main()
 
         if ( ticks % SECONDS(0.3f) == 0 ) {
             // temp: dx dy affects head of snake
-            snake[0].x += dx;
-            snake[0].y += dy;
-            
-       
             for ( int i = SNAKE_MAX_LEN; i > 0; i-- ) {
                 snake[i].x = snake[i-1].x;
                 snake[i].y = snake[i-1].y;
             } 
+            snake[0].x += dx;
+            snake[0].y += dy;
         }
 
         //===============================================
