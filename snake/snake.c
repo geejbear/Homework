@@ -25,9 +25,6 @@
 #define MIN_X 0
 #define MIN_Y 0
 
-#define TRUE 1
-#define FALSE 0
-
 #define FPS 30
 #define SECONDS(x) (int)((float)(x) * (float)FPS)
 #define UPDATE_INTERVAL_TICKS 15 // how often (interval) does game update
@@ -41,21 +38,20 @@ void RenderApple(int x, int y, char ch, int fc)
     DOS_PrintChar(ch); 
 }
 
-
 // example: probably better than a macro
 int SecondsToTicks(float seconds)
 {
     return seconds * (float)FPS;
 }
 
-void CollectAppleSoundEffect()
+void CollectAppleSoundEffect(void)
 {
     DOS_InitSound();
     DOS_Sound(880, 70);        
     DOS_Sound(1720, 70);
 }
 
-void RenderSnakeToTheMiddle(int point_x[], int point_y[])
+void RenderSnakeBackToStart(int point_x[], int point_y[])
 {
     for ( int i = 0; i < SNAKE_MAX_LEN; i++ ) {
         point_x[i] = CONSOLE_W / 2;
@@ -82,6 +78,24 @@ typedef struct {
 int dx, dy;
 Point snake[SNAKE_MAX_LEN];
 int snake_body = SNAKE_INITIAL_LENGTH; 
+
+int map[CONSOLE_H][CONSOLE_W] = {
+    { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+    { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
+};
 
 /* void Input(int key, bool running, SDL_Event event)
 {
@@ -157,7 +171,8 @@ int main()
         .active = true,
     };
 
-   RenderApple(apple.x, apple.y, apple.ch, apple.fc);
+    
+    RenderApple(apple.x, apple.y, apple.ch, apple.fc);
 
     //===================================================
 
@@ -204,18 +219,18 @@ int main()
                 }
         }
 
-        if (( snake[0].x == MIN_X - 1 || snake[0].x == CONSOLE_W ) || 
-             ( snake[0].y == MIN_Y - 1 || snake[0].y == CONSOLE_H )) {
+        if (( snake[0].x == MIN_X  || snake[0].x == CONSOLE_W - 1 ) || 
+             ( snake[0].y == MIN_Y || snake[0].y == CONSOLE_H - 1)) {
             snake_body = SNAKE_INITIAL_LENGTH;
-            RenderSnakeToTheMiddle(&snake[0].x, &snake[0].y);
-
+            RenderSnakeBackToStart(&snake[0].x, &snake[0].y);
         }    
 
         //if head colides with body, snakes jumps back to the start position
         for ( int i = snake_body; i > 1; i-- ) {
             if (( snake[0].x == snake[i].x) && (snake[0].y == snake[i].y )) {
+                DOS_ClearScreen();
                 snake_body = SNAKE_INITIAL_LENGTH;
-                RenderSnakeToTheMiddle(&snake[0].x, &snake[0].y);
+                RenderSnakeBackToStart(&snake[0].x, &snake[0].y);
             }
         }
         
@@ -253,7 +268,18 @@ int main()
            
         // 3) RENDER GAME
         DOS_ClearScreen();
-        
+        //draw map
+        int y, x = 0;
+        for ( y = 0; y < CONSOLE_H; y++ ) {
+            for ( x = 0; x < CONSOLE_W; x++ ) {
+                if (map[y][x]) {
+                    DOS_GotoXY(x, y);
+                    DOS_SetForeground(DOS_GRAY);
+                    DOS_PrintChar(219);
+                }    
+            }
+        }
+
         // draw snake
         
         for ( int i = 0; i < snake_body; i++ ) {
@@ -264,10 +290,14 @@ int main()
             
         // TEMP: draw apple
 
-        if ( apple.active ) {
-            RenderApple(apple.x, apple.y, apple.ch, apple.fc);
+        if ( apple.active )  {
+            for ( int i = snake_body; i > 1; i-- ) {
+                if (( apple.x != snake[i].x ) && ( apple.y != snake[i].y )) {
+                        RenderApple(apple.x, apple.y, apple.ch, apple.fc);
+                } 
+            }
         }
-        
+
         DOS_DrawScreen();
     }
     
