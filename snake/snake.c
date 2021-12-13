@@ -31,7 +31,7 @@
 #define SNAKE_INITIAL_LENGTH 3 
 #define SNAKE_MAX_LEN CONSOLE_SIZE
 
-void RenderApple(int x, int y, char ch, int fc)
+void RenderApple(int x, int y, char ch, int fc) // Apple is an entity
 {
     DOS_GotoXY(x, y);
     DOS_SetForeground(fc);
@@ -62,7 +62,7 @@ void RenderSnakeBackToStart(int point_x[], int point_y[])
 typedef struct {
     int x;
     int y;
-    bool active;
+    bool active; // TF: no
 } Point;
 
 typedef struct {
@@ -77,8 +77,9 @@ typedef struct {
 // snake data structure
 int dx, dy;
 Point snake[SNAKE_MAX_LEN];
-int snake_body = SNAKE_INITIAL_LENGTH; 
+int snake_len = SNAKE_INITIAL_LENGTH; // num of segments in snake
 
+#if 0
 int map[CONSOLE_H][CONSOLE_W] = {
     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
     { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
@@ -96,6 +97,7 @@ int map[CONSOLE_H][CONSOLE_W] = {
     { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
 };
+#endif
 
 /* void Input(int key, bool running, SDL_Event event)
 {
@@ -135,6 +137,14 @@ int map[CONSOLE_H][CONSOLE_W] = {
     }
 } */
 
+void DrawSnake() {
+    for ( int i = 0; i < snake_len; i++ ) {
+        DOS_GotoXY(snake[i].x, snake[i].y);
+        DOS_SetForeground(DOS_GREEN);
+        DOS_PrintChar(0xB1);
+    }
+}
+
 int main()
 {
     //init console
@@ -144,18 +154,16 @@ int main()
     }
     
     DOS_InitScreen("Bounder", CONSOLE_W, CONSOLE_H, DOS_MODE40, 4);
+    //DOS_InitSound();
     DOS_SetScreenScale(3);
     DOS_SetCursorType(DOS_CURSOR_NONE);
     
     //===================================================
     
     // initial snake
-    char snake_ch = 0xB1;
-    int snake_cl = DOS_GREEN;
+    snake[snake_len].active = true; // ??
     
-    snake[snake_body].active = true;
-    
-    for ( int i = 0; i < SNAKE_MAX_LEN; i++ ) {
+    for ( int i = 0; i < snake_len; i++ ) {
         snake[i].x = CONSOLE_W / 2;
         snake[i].y = CONSOLE_H / 2 + i; 
     }
@@ -172,12 +180,12 @@ int main()
     };
 
     
-    RenderApple(apple.x, apple.y, apple.ch, apple.fc);
+    //RenderApple(apple.x, apple.y, apple.ch, apple.fc);
 
     //===================================================
 
     // program loop:
-    dx = 0, dy = -1;
+    dx = 0, dy = -1; // TF: game design: dx/dy both 0
     int ticks = 0;
     bool running = true;
     while ( running ) {
@@ -219,41 +227,40 @@ int main()
                 }
         }
 
+        // make snake "wrap around" to other side of screen
+#if 0
         if (( snake[0].x == MIN_X  || snake[0].x == CONSOLE_W - 1 ) || 
              ( snake[0].y == MIN_Y || snake[0].y == CONSOLE_H - 1)) {
-            snake_body = SNAKE_INITIAL_LENGTH;
-            RenderSnakeBackToStart(&snake[0].x, &snake[0].y);
-        }    
+            snake_len = SNAKE_INITIAL_LENGTH;
+            
+        }
 
-        //if head colides with body, snakes jumps back to the start position
-        for ( int i = snake_body; i > 1; i-- ) {
+        //if head collides with body, snakes jumps back to the start position
+        for ( int i = snake_len; i > 1; i-- ) {
             if (( snake[0].x == snake[i].x) && (snake[0].y == snake[i].y )) {
-                DOS_ClearScreen();
-                snake_body = SNAKE_INITIAL_LENGTH;
-                RenderSnakeBackToStart(&snake[0].x, &snake[0].y);
+                
+                snake_len = SNAKE_INITIAL_LENGTH;
+                
             }
         }
+#endif
         
         //===============================================
 
         // 2) SIMULATE/UPDATE GAME
 
         if ( apple.x == snake[0].x && apple.y == snake[0].y ) {
-            apple.active = false;
-
-        } else if ( !apple.active ) {
-            CollectAppleSoundEffect();      
+            // eat the apple
+            CollectAppleSoundEffect();
             
             apple.x = rand() % CONSOLE_W;
             apple.y = rand() % CONSOLE_H;
             
-            RenderApple(apple.x, apple.y, apple.ch, apple.fc);
-  
-            snake_body++;
-            
-            apple.active = true;
+            snake_len++;
+
         }
 
+        // move the snake
         if ( ticks % SECONDS(0.3f) == 0 ) {
             // temp: dx dy affects head of snake
             for ( int i = SNAKE_MAX_LEN; i > 0; i-- ) {
@@ -265,39 +272,11 @@ int main()
         }
 
         //===============================================
-           
         // 3) RENDER GAME
-        DOS_ClearScreen();
-        //draw map
-        int y, x = 0;
-        for ( y = 0; y < CONSOLE_H; y++ ) {
-            for ( x = 0; x < CONSOLE_W; x++ ) {
-                if (map[y][x]) {
-                    DOS_GotoXY(x, y);
-                    DOS_SetForeground(DOS_GRAY);
-                    DOS_PrintChar(219);
-                }    
-            }
-        }
-
-        // draw snake
         
-        for ( int i = 0; i < snake_body; i++ ) {
-            DOS_GotoXY(snake[i].x, snake[i].y);
-            DOS_SetForeground(snake_cl);
-            DOS_PrintChar(snake_ch);
-        }            
-            
-        // TEMP: draw apple
-
-        if ( apple.active )  {
-            for ( int i = snake_body; i > 1; i-- ) {
-                if (( apple.x != snake[i].x ) && ( apple.y != snake[i].y )) {
-                        RenderApple(apple.x, apple.y, apple.ch, apple.fc);
-                } 
-            }
-        }
-
+        DOS_ClearScreen();
+        RenderApple(apple.x, apple.y, apple.ch, apple.fc);
+        DrawSnake();
         DOS_DrawScreen();
     }
     
@@ -307,3 +286,36 @@ int main()
     
     return EXIT_SUCCESS;
 }
+
+
+
+
+
+// was in drawing section, should be in update section
+#if 0
+        if ( apple.active )  {
+            for ( int i = snake_len; i > 1; i-- ) {
+                if (( apple.x != snake[i].x ) && ( apple.y != snake[i].y )) {
+                        RenderApple(apple.x, apple.y, apple.ch, apple.fc);
+                }
+            }
+        }
+#endif
+
+
+
+
+
+// drawing map array
+#if 0
+        int y, x = 0; // TF: make local
+        for ( y = 0; y < CONSOLE_H; y++ ) {
+            for ( x = 0; x < CONSOLE_W; x++ ) {
+                if (map[y][x]) {
+                    DOS_GotoXY(x, y);
+                    DOS_SetForeground(DOS_GRAY);
+                    DOS_PrintChar(219);
+                }
+            }
+        }
+#endif
