@@ -8,13 +8,25 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 
-
 #define CONSOLE_H 15
 #define CONSOLE_W 15
 #define MIN_X 0
 #define MIN_Y 0
 #define FPS 30
 #define SNAKE_ARRAY_LEN 100
+#define SNAKE_CHAR 0xB1
+#define APPLE_CHAR 0x95
+
+#if 0
+void loop_array(Entity *array)
+{
+    int i = 0;
+    while ( i < SNAKE_ARRAY_LEN ) {
+        array[i] = 'S';
+        i += 1;
+    }
+}
+#endif
 
 int IsSDLInit() 
 {
@@ -44,8 +56,9 @@ int main()
     int snake_head = 0;
     int snake_len = 4;
     
-    snake[0] = NewArrayEntity(snake_head, snake_len, CONSOLE_W / 2, CONSOLE_H / 2, 0, 0, 0xB1, DOS_GREEN); //snake
-    NewEntity(&apple, rand() % CONSOLE_H, rand() % CONSOLE_W, 0, 0, 0x95, DOS_RED); //apple
+    snake[snake_head] = NewArrayEntity(snake_head, snake_len, CONSOLE_W / 2, CONSOLE_H / 2, 0, 0, SNAKE_CHAR, DOS_GREEN); //snake
+    
+    NewEntity(&apple, rand() % CONSOLE_H, rand() % CONSOLE_W, 0, 0, APPLE_CHAR, DOS_RED); //apple
     
     
     bool running = true;
@@ -92,7 +105,7 @@ int main()
 
         if ( ticks % 10 == 0 ) {
             #if 0
-            for ( int i = snake_len - 1; i > 1; i-- ) {
+            for ( int i = snake_len - 1; i > 0; i-- ) {
                 snake[i].x = snake[i-1].x;
                 snake[i].y = snake[i-1].y;
             }
@@ -113,7 +126,7 @@ int main()
       
         //Draw game
         DOS_ClearScreen();
-        RenderArrayEntity(&snake[0], snake_head, snake_len);
+        RenderArrayEntity(snake, snake_head, snake_len);
         RenderEntity(&apple);
         DOS_DrawScreen();
     }    

@@ -38,11 +38,10 @@ void RenderEntity(Entity *e)
 
 void RenderArrayEntity(Entity array[0], int array_adress, int array_len) 
 {
+    
     DOS_GotoXY(array[array_adress].x, array[array_adress].y);
     DOS_SetForeground(array[array_adress].fc);
-    DOS_PrintChar(array[array_adress].ch);
-        
-    
+    DOS_PrintChar(array[array_adress].ch);        
 }
 
 void CollectAppleSoundEffect(void)
